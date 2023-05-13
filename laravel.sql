@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Waktu pembuatan: 10 Bulan Mei 2023 pada 15.04
+-- Waktu pembuatan: 13 Bulan Mei 2023 pada 11.42
 -- Versi server: 10.4.27-MariaDB
 -- Versi PHP: 8.2.0
 
@@ -129,6 +129,29 @@ CREATE TABLE `approval_types` (
 INSERT INTO `approval_types` (`id`, `label`, `type`, `group`, `created_at`, `updated_at`) VALUES
 (1, 'Create Leave', 'create_leave', 'leave', '2023-05-05 22:03:28', '2023-05-05 22:03:28'),
 (2, 'Attendance Without Schedule', 'attendance_without_schedule', 'attendance', '2023-05-05 22:03:28', '2023-05-05 22:03:28');
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `area`
+--
+
+CREATE TABLE `area` (
+  `id` int(255) NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `id_branch` varchar(255) NOT NULL,
+  `deleted_at` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `area`
+--
+
+INSERT INTO `area` (`id`, `nama`, `id_branch`, `deleted_at`) VALUES
+(1, 'Zamrud2', '5', NULL),
+(6, 'asdasd', '5', NULL),
+(7, 'Zamrud', '8', NULL),
+(8, 'Emas', '8', NULL);
 
 -- --------------------------------------------------------
 
@@ -366,9 +389,22 @@ INSERT INTO `branches` (`id`, `telegram_chat_id`, `manager`, `nohp`, `name`, `ad
 (1, NULL, '3', '', 'HQ', 'Jl Dummy', 'Jawa Tengah', 'Semarang', '52212', '-5.836311069120119', '112.66920386677617', 500, 'Asia/Jakarta', NULL, NULL, 1, '', '', '2023-05-05 22:03:21', '2023-05-09 10:23:28', '2023-05-09 10:23:28', 'tidak aktif', ''),
 (2, NULL, '4', '', 'HM', 'Jl Dummy', 'Jawa Tengah', 'Semarang', '52212', '-5.836311069120119', '112.66920386677617', 500, 'Asia/Jakarta', NULL, NULL, 1, '', '', '2023-05-05 22:03:21', '2023-05-09 10:25:24', '2023-05-09 10:25:24', 'aktif', ''),
 (4, NULL, '4', '+6285156898315', 'Test Project', 'Jl Dummy', 'Jawa Timur', 'Jember', '500', '-118812912912', '4423432324', 233, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-10', '2023-05-26', '2023-05-09 09:31:47', '2023-05-09 10:31:41', '2023-05-09 10:31:41', 'Aktif', NULL),
-(5, NULL, '4', '3232432', 'Kecil', 'sadasd', 'asdasd', 'asdsad', '2121', '332234', '32432', 2231, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-03', '2023-05-27', '2023-05-09 09:56:33', '2023-05-09 10:17:23', NULL, 'Aktif', 'Project'),
+(5, NULL, '9', '3232432', 'Kecil', 'sadasd', 'asdasd', 'asdsad', '2121', '-5.836311069120119', '112.66920386677617', 2231, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-03', '2023-05-27', '2023-05-09 09:56:33', '2023-05-11 22:50:52', NULL, 'Aktif', 'Project'),
 (6, NULL, '10', '+6273712113121', 'Test dua', 'Jl Dummy', 'Jawa Timur', 'Jember', '121212', '831193121', '-831193121', 500, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-01', '2023-05-31', '2023-05-09 20:31:43', '2023-05-09 20:32:05', '2023-05-09 20:32:05', 'Aktif', 'Project'),
-(7, NULL, '4', '+623232432', 'Testdua', 'Jl Dummy', 'Jawa Timur', 'Jember', '21321', '332234', '32432', 2231, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-01', '2023-05-31', '2023-05-09 20:33:43', '2023-05-09 20:34:02', '2023-05-09 20:34:02', 'Aktif', 'Project');
+(7, NULL, '4', '+623232432', 'Testdua', 'Jl Dummy', 'Jawa Timur', 'Jember', '21321', '332234', '32432', 2231, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-01', '2023-05-31', '2023-05-09 20:33:43', '2023-05-09 20:34:02', '2023-05-09 20:34:02', 'Aktif', 'Project'),
+(8, NULL, '12', '08888312121', 'Besar', 'asddas', 'asdasd', 'sadads', '2121', '332234', '32432', 233, 'Asia/Jakarta', NULL, NULL, 1, '2023-05-01', '2023-05-25', '2023-05-12 22:48:23', '2023-05-12 22:48:23', NULL, 'Aktif', 'Project');
+
+--
+-- Trigger `branches`
+--
+DELIMITER $$
+CREATE TRIGGER `generatecode` AFTER INSERT ON `branches` FOR EACH ROW BEGIN
+
+INSERT INTO `struktur` (`id`, `kode`, `pegawai_id`, `jabatan_id`, `id_area`, `schedule`) VALUES (NULL, CONCAT(NEW.id,','), NEW.manager, '1', NULL, 'non shift');
+
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -498,6 +534,10 @@ CREATE TABLE `employees` (
   `id` bigint(20) UNSIGNED NOT NULL,
   `user_id` bigint(20) UNSIGNED DEFAULT NULL,
   `branch_id` bigint(20) UNSIGNED DEFAULT NULL,
+  `kode` varchar(255) DEFAULT NULL,
+  `area` varchar(255) DEFAULT NULL,
+  `schedule` varchar(255) DEFAULT NULL,
+  `pleton` varchar(255) DEFAULT NULL,
   `designation_id` bigint(20) UNSIGNED DEFAULT NULL,
   `phone_number` varchar(255) NOT NULL,
   `start_date` date NOT NULL,
@@ -535,28 +575,51 @@ CREATE TABLE `employees` (
 -- Dumping data untuk tabel `employees`
 --
 
-INSERT INTO `employees` (`id`, `user_id`, `branch_id`, `designation_id`, `phone_number`, `start_date`, `end_date`, `address`, `account_number`, `employee_external_id`, `image`, `employee_input_order`, `birth_date`, `gender`, `ptkp_tax_list_id`, `employment_status_id`, `payroll_group_id`, `is_use_bpjsk`, `bpjsk_number_card`, `bpjsk_setting_id`, `bpjsk_specific_amount`, `is_use_bpjstk`, `bpjstk_number_card`, `bpjstk_setting_id`, `bpjstk_old_age`, `bpjstk_life_insurance`, `bpjstk_pension_time`, `bpjstk_specific_amount`, `created_at`, `updated_at`, `deleted_at`, `account_name`, `bank_name`, `manager_id`) VALUES
-(1, 3, 1, 1, '+6914296340', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050001', NULL, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(2, 4, 1, 1, '+901996280018', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050002', NULL, 2, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(3, 5, 1, 1, '+29084893', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050003', NULL, 3, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(4, 6, 1, 1, '+221027047317', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050004', NULL, 4, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(5, 7, 1, 1, '+377243940046', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050005', NULL, 5, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(6, 8, 1, 1, '+8802537075924', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050006', NULL, 6, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(7, 9, 1, 1, '+299167021', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050007', NULL, 7, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(8, 10, 1, 1, '+80093235579', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050008', NULL, 8, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(9, 11, 1, 1, '+243075033323', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050009', NULL, 9, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(10, 12, 1, 1, '+812301403823', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050010', NULL, 10, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(11, 13, 1, 1, '+6778064466', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050011', NULL, 11, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(12, 14, 1, 1, '+967906645561', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050012', NULL, 12, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(13, 15, 1, 1, '+298325946', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050013', NULL, 13, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(14, 16, 1, 1, '+244473312133', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050014', NULL, 14, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
-(15, 17, 1, 1, '+88881778240943', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050015', NULL, 15, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(16, 18, 1, 1, '+240043549481', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050016', NULL, 16, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(17, 19, 1, 1, '+590265225416', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050017', NULL, 17, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(18, 20, 1, 1, '+35769485230', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050018', NULL, 18, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(19, 21, 1, 1, '+299235112', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050019', NULL, 19, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(20, 22, 1, 1, '+264371840088', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050020', NULL, 20, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
-(21, 23, 2, 1, '+6285156898315', '2023-05-07', NULL, 'sadsad', '3112133112', '23050021', 1, 21, NULL, NULL, 1, 1, 1, 0, NULL, NULL, '0.0000', 0, NULL, NULL, 0, 0, 0, '0.0000', '2023-05-06 19:57:52', '2023-05-06 19:57:52', NULL, 'sadasasd', 'bni', 1);
+INSERT INTO `employees` (`id`, `user_id`, `branch_id`, `kode`, `area`, `schedule`, `pleton`, `designation_id`, `phone_number`, `start_date`, `end_date`, `address`, `account_number`, `employee_external_id`, `image`, `employee_input_order`, `birth_date`, `gender`, `ptkp_tax_list_id`, `employment_status_id`, `payroll_group_id`, `is_use_bpjsk`, `bpjsk_number_card`, `bpjsk_setting_id`, `bpjsk_specific_amount`, `is_use_bpjstk`, `bpjstk_number_card`, `bpjstk_setting_id`, `bpjstk_old_age`, `bpjstk_life_insurance`, `bpjstk_pension_time`, `bpjstk_specific_amount`, `created_at`, `updated_at`, `deleted_at`, `account_name`, `bank_name`, `manager_id`) VALUES
+(1, 3, 1, '', '', '', NULL, 1, '+6914296340', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050001', NULL, 1, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(2, 4, 1, '', '', '', NULL, 1, '+901996280018', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050002', NULL, 2, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(3, 5, 1, '', '', '', NULL, 1, '+29084893', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050003', NULL, 3, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(4, 6, 1, '', '', '', NULL, 1, '+221027047317', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050004', NULL, 4, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(5, 7, 1, '', '', '', NULL, 1, '+377243940046', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050005', NULL, 5, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(6, 8, 1, '', '', '', NULL, 1, '+8802537075924', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050006', NULL, 6, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(7, 9, 1, '', '', '', NULL, 1, '+299167021', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050007', NULL, 7, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(8, 10, 1, '', '', '', NULL, 1, '+80093235579', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050008', NULL, 8, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(9, 11, 1, '', '', '', NULL, 1, '+243075033323', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050009', NULL, 9, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(10, 12, 1, '', '', '', NULL, 1, '+812301403823', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050010', NULL, 10, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(11, 13, 1, '', '', '', NULL, 1, '+6778064466', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050011', NULL, 11, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(12, 14, 1, '', '', '', NULL, 1, '+967906645561', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050012', NULL, 12, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(13, 15, 1, '', '', '', NULL, 1, '+298325946', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050013', NULL, 13, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(14, 16, 1, '', '', '', NULL, 1, '+244473312133', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050014', NULL, 14, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:27', '2023-05-05 22:03:27', NULL, NULL, NULL, NULL),
+(15, 17, 1, '', '', '', NULL, 1, '+88881778240943', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050015', NULL, 15, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(16, 18, 1, '', '', '', NULL, 1, '+240043549481', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050016', NULL, 16, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(17, 19, 1, '', '', '', NULL, 1, '+590265225416', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050017', NULL, 17, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(18, 20, 1, '', '', '', NULL, 1, '+35769485230', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050018', NULL, 18, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(19, 21, 1, '', '', '', NULL, 1, '+299235112', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050019', NULL, 19, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(20, 22, 1, '', '', '', NULL, 1, '+264371840088', '2022-01-01', '2070-01-01', 'Jl Impian', '12412312312', '23050020', NULL, 20, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, 0, NULL, NULL, 0, 0, 0, NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL, NULL, NULL),
+(21, 23, 2, '', '', '', NULL, 1, '+6285156898315', '2023-05-07', NULL, 'sadsad', '3112133112', '23050021', 1, 21, NULL, NULL, 1, 1, 1, 0, NULL, NULL, '0.0000', 0, NULL, NULL, 0, 0, 0, '0.0000', '2023-05-06 19:57:52', '2023-05-06 19:57:52', NULL, 'sadasasd', 'bni', 1),
+(22, 24, 5, '', '', '', NULL, 1, '+62832432423', '2023-05-01', NULL, 'asda', '1231212', 'sadas', 9, 22, NULL, NULL, 1, 1, 1, 0, NULL, NULL, '0.0000', 0, NULL, NULL, 0, 0, 0, '0.0000', '2023-05-12 19:48:32', '2023-05-12 19:48:32', NULL, 'sadas', 'bni', 2),
+(32, 28, 8, '8,', 'Zamrud', 'Shift', 'Pleton 1', 1, '+6241223123123', '2023-05-13', NULL, 'asdas', '32231123', '1231231221331223213', 13, 23, NULL, NULL, 2, 1, 1, 0, NULL, NULL, '0.0000', 0, NULL, NULL, 0, 0, 0, '0.0000', '2023-05-12 23:36:13', '2023-05-13 00:32:54', NULL, 'sadasd', 'asdas', 1),
+(33, 31, 8, '8,2', '', '', NULL, 1, '+622321312563', '2023-05-13', NULL, 'asdas', '321', '3426744', 16, 24, NULL, NULL, 2, 1, 1, 0, NULL, NULL, '0.0000', 0, NULL, NULL, 0, 0, 0, '0.0000', '2023-05-13 00:34:35', '2023-05-13 00:34:35', NULL, 'asd', 'asd', 1);
+
+--
+-- Trigger `employees`
+--
+DELIMITER $$
+CREATE TRIGGER `increment_kode` BEFORE INSERT ON `employees` FOR EACH ROW BEGIN
+            DECLARE branchid INT;
+            DECLARE increment_number INT;
+            SET branchid = NEW.branch_id;
+            SET increment_number = (SELECT COUNT(*) FROM employees WHERE branch_id = NEW.branch_id);
+            IF increment_number = 0 THEN
+                SET NEW.kode = CONCAT(branchid, ',');
+            ELSEIF increment_number > 10 THEN
+                SET NEW.kode = CONCAT(branchid, ',', increment_number - 10);
+            ELSE
+                SET NEW.kode = CONCAT(branchid, ',', increment_number);
+            END IF;
+        END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -663,7 +726,14 @@ INSERT INTO `files` (`id`, `url`, `file_name`, `extension`, `size`, `created_at`
 (5, '', 'GqmKgErb7qfPDRsH7F5xWmPet3QStm8kZkYYbSTcGmtpNhr8lVJZNXoljeoU', 'png', 167, '2023-05-10 04:43:29', '2023-05-10 04:43:29', NULL, '/storage/file/2023/05/10/GqmKgErb7qfPDRsH7F5xWmPet3QStm8kZkYYbSTcGmtpNhr8lVJZNXoljeoU.png'),
 (6, '', '3maLKxZ2moUJ0OG6dV8fOt1a2n8eSZIAdOgnIDMCJXWWi2aWDijQf5CWMqMJ', 'png', 34, '2023-05-10 04:43:58', '2023-05-10 04:43:58', NULL, '/storage/file/2023/05/10/3maLKxZ2moUJ0OG6dV8fOt1a2n8eSZIAdOgnIDMCJXWWi2aWDijQf5CWMqMJ.png'),
 (7, '', 'IQZXXfuJSFQSg5kbjdDa9DtUJWjqxSiQvo4BE8twsUDLTQtsrxBHMA5LOgCd', 'png', 167, '2023-05-10 04:44:16', '2023-05-10 04:44:16', NULL, '/storage/file/2023/05/10/IQZXXfuJSFQSg5kbjdDa9DtUJWjqxSiQvo4BE8twsUDLTQtsrxBHMA5LOgCd.png'),
-(8, '', 'mKmbot4cJBA41GG7BJJwqNhPCASjU1waIiUpMc2qjFunKRdaV6nr3U4I16hG', 'png', 167, '2023-05-10 04:44:58', '2023-05-10 04:44:58', NULL, '/storage/file/2023/05/10/mKmbot4cJBA41GG7BJJwqNhPCASjU1waIiUpMc2qjFunKRdaV6nr3U4I16hG.png');
+(8, '', 'mKmbot4cJBA41GG7BJJwqNhPCASjU1waIiUpMc2qjFunKRdaV6nr3U4I16hG', 'png', 167, '2023-05-10 04:44:58', '2023-05-10 04:44:58', NULL, '/storage/file/2023/05/10/mKmbot4cJBA41GG7BJJwqNhPCASjU1waIiUpMc2qjFunKRdaV6nr3U4I16hG.png'),
+(9, '', 'YvpSimVdooTYkUmf13ikmGIamwWMaIBR1PUpPfHbpC6iaaeEUHfLn90HEpPc', 'png', 142, '2023-05-12 19:48:32', '2023-05-12 19:48:32', NULL, '/storage/file/2023/05/13/YvpSimVdooTYkUmf13ikmGIamwWMaIBR1PUpPfHbpC6iaaeEUHfLn90HEpPc.png'),
+(10, '', 'TR8Tr6BrKinOrYQHAshihI56SrOW1uYor9kFBB4SnElmo97FknIBi5pI0kSq', 'jpg', 78, '2023-05-12 22:50:56', '2023-05-12 22:50:56', NULL, '/storage/file/2023/05/13/TR8Tr6BrKinOrYQHAshihI56SrOW1uYor9kFBB4SnElmo97FknIBi5pI0kSq.jpg'),
+(11, '', '8BM3nrxrsxFiKXYBcCl2ByMJLZ3W0jcMTcPPwfV4SyRvXYabum4prcOAsVmH', 'png', 142, '2023-05-12 23:24:16', '2023-05-12 23:24:16', NULL, '/storage/file/2023/05/13/8BM3nrxrsxFiKXYBcCl2ByMJLZ3W0jcMTcPPwfV4SyRvXYabum4prcOAsVmH.png'),
+(13, '', 'X4UsrWiXDJ9j74ve3SRajA5aqONOPjLdkbpdBvdPtaFAr1Ckis8lAsonJ84H', 'png', 197, '2023-05-12 23:36:13', '2023-05-12 23:36:13', NULL, '/storage/file/2023/05/13/X4UsrWiXDJ9j74ve3SRajA5aqONOPjLdkbpdBvdPtaFAr1Ckis8lAsonJ84H.png'),
+(14, '', 'xOeSCmVmeNWv8eEZBcf406hqpUutoBhycJ8cH5c8jFEnjWIoFN3kX3hR7f7M', 'jpg', 9, '2023-05-12 23:39:27', '2023-05-12 23:39:27', NULL, '/storage/file/2023/05/13/xOeSCmVmeNWv8eEZBcf406hqpUutoBhycJ8cH5c8jFEnjWIoFN3kX3hR7f7M.jpg'),
+(15, '', 'xhBtGxDTgIHXPPzKYelrWzYy3p6R1q4d7Rf9PvG9bCZ9X5CQvPOCqyQyhQyR', 'png', 12, '2023-05-13 00:01:25', '2023-05-13 00:01:25', NULL, '/storage/file/2023/05/13/xhBtGxDTgIHXPPzKYelrWzYy3p6R1q4d7Rf9PvG9bCZ9X5CQvPOCqyQyhQyR.png'),
+(16, '', 'WgDMvvTIa0AOQE4cchml4pmTURMFStuHyQr1R55aUZY5losLeaobgEld1P47', 'jpg', 78, '2023-05-13 00:34:35', '2023-05-13 00:34:35', NULL, '/storage/file/2023/05/13/WgDMvvTIa0AOQE4cchml4pmTURMFStuHyQr1R55aUZY5losLeaobgEld1P47.jpg');
 
 -- --------------------------------------------------------
 
@@ -894,7 +964,14 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 (2, 'App\\Models\\User', 20),
 (2, 'App\\Models\\User', 21),
 (2, 'App\\Models\\User', 22),
-(2, 'App\\Models\\User', 23);
+(2, 'App\\Models\\User', 23),
+(2, 'App\\Models\\User', 24),
+(2, 'App\\Models\\User', 25),
+(2, 'App\\Models\\User', 26),
+(2, 'App\\Models\\User', 28),
+(2, 'App\\Models\\User', 29),
+(2, 'App\\Models\\User', 30),
+(2, 'App\\Models\\User', 31);
 
 -- --------------------------------------------------------
 
@@ -1263,6 +1340,41 @@ CREATE TABLE `personal_access_tokens` (
 -- --------------------------------------------------------
 
 --
+-- Struktur dari tabel `pleton`
+--
+
+CREATE TABLE `pleton` (
+  `id` int(255) NOT NULL,
+  `nama` varchar(255) NOT NULL,
+  `id_area` varchar(255) NOT NULL,
+  `deleted_at` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `pleton`
+--
+
+INSERT INTO `pleton` (`id`, `nama`, `id_area`, `deleted_at`) VALUES
+(1, 'pleton 4', '1', NULL),
+(2, 'asad', '2', NULL),
+(3, 'sadas', '3', NULL),
+(4, 'sadas', '4', NULL),
+(5, 'sada', '5', NULL),
+(6, 'asda', '1', NULL),
+(7, 'asad', '6', NULL),
+(8, 'pleton2', '1', NULL),
+(9, 'asad', '1', NULL),
+(10, 'Pleton 1', '7', NULL),
+(11, 'Pleton 2', '7', NULL),
+(12, 'Dinamic', '7', NULL),
+(13, 'Emas', '7', NULL),
+(14, 'asad', '7', NULL),
+(15, 'test', '7', NULL),
+(16, 'Pleton 1', '8', NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Struktur dari tabel `pph_range_rules`
 --
 
@@ -1447,7 +1559,38 @@ CREATE TABLE `schedules` (
 
 INSERT INTO `schedules` (`id`, `shift_id`, `user_id`, `date`, `is_leave`, `created_at`, `updated_at`) VALUES
 (1, 1, 3, '2023-05-06', 0, '2023-05-06 08:47:26', '2023-05-06 08:47:26'),
-(2, 1, 3, '2023-05-07', 0, '2023-05-06 08:47:26', '2023-05-06 08:47:26');
+(2, 1, 3, '2023-05-07', 0, '2023-05-06 08:47:26', '2023-05-06 08:47:26'),
+(3, NULL, 24, '2023-05-01', 1, '2023-05-12 19:48:58', '2023-05-12 19:48:58'),
+(4, NULL, 24, '2023-05-02', 1, '2023-05-12 19:48:58', '2023-05-12 19:48:58'),
+(5, NULL, 24, '2023-05-03', 1, '2023-05-12 19:48:58', '2023-05-12 19:48:58'),
+(6, NULL, 24, '2023-05-04', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(7, NULL, 24, '2023-05-05', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(8, NULL, 24, '2023-05-06', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(9, NULL, 24, '2023-05-07', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(10, NULL, 24, '2023-05-08', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(11, NULL, 24, '2023-05-09', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(12, NULL, 24, '2023-05-10', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(13, NULL, 24, '2023-05-11', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(14, NULL, 24, '2023-05-12', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(15, NULL, 24, '2023-05-13', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(16, NULL, 24, '2023-05-14', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(17, NULL, 24, '2023-05-15', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(18, NULL, 24, '2023-05-16', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(19, NULL, 24, '2023-05-17', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(20, NULL, 24, '2023-05-18', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(21, NULL, 24, '2023-05-19', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(22, NULL, 24, '2023-05-20', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(23, NULL, 24, '2023-05-21', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(24, NULL, 24, '2023-05-22', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(25, NULL, 24, '2023-05-23', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(26, NULL, 24, '2023-05-24', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(27, NULL, 24, '2023-05-25', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(28, NULL, 24, '2023-05-26', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(29, NULL, 24, '2023-05-27', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(30, NULL, 24, '2023-05-28', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(31, NULL, 24, '2023-05-29', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(32, NULL, 24, '2023-05-30', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59'),
+(33, NULL, 24, '2023-05-31', 1, '2023-05-12 19:48:59', '2023-05-12 19:48:59');
 
 -- --------------------------------------------------------
 
@@ -1506,7 +1649,31 @@ CREATE TABLE `shifts` (
 INSERT INTO `shifts` (`id`, `branch_id`, `name`, `is_night_shift`, `start_time`, `end_time`, `created_at`, `updated_at`, `deleted_at`) VALUES
 (1, 1, 'Shift Normal', 0, '08:00', '18:00', '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL),
 (2, 1, 'Shift Malam', 1, '19:00', '02:00', '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL),
-(3, 2, 'pppp', 0, '22:47', '22:47', '2023-05-06 08:47:51', '2023-05-06 08:47:51', NULL);
+(3, 2, 'pppp', 0, '22:47', '22:47', '2023-05-06 08:47:51', '2023-05-06 08:47:51', NULL),
+(4, 8, 'Shift', 0, '06:52', '12:52', '2023-05-12 22:52:51', '2023-05-12 22:52:51', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `struktur`
+--
+
+CREATE TABLE `struktur` (
+  `id` int(255) NOT NULL,
+  `kode` varchar(255) NOT NULL,
+  `pegawai_id` varchar(255) DEFAULT NULL,
+  `jabatan_id` varchar(255) NOT NULL,
+  `id_area` varchar(255) DEFAULT NULL,
+  `schedule` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data untuk tabel `struktur`
+--
+
+INSERT INTO `struktur` (`id`, `kode`, `pegawai_id`, `jabatan_id`, `id_area`, `schedule`) VALUES
+(1, '5,', '1', '1', NULL, 'non shift\r\n'),
+(2, '8,', '12', '1', NULL, 'non shift');
 
 -- --------------------------------------------------------
 
@@ -1555,7 +1722,14 @@ INSERT INTO `users` (`id`, `user_device`, `name`, `email`, `email_verified_at`, 
 (20, NULL, 'Kariman Kurniawan', 'sinaga.panca@example.org', '2023-05-05 22:03:28', '$2y$10$ms0baSqksiYB9Jma1z4yIOcRCpt2jnw4fwmMUeuyPavvPDPUetLGS', NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL),
 (21, NULL, 'Hani Gabriella Yuniar S.Gz', 'lhandayani@example.com', '2023-05-05 22:03:28', '$2y$10$vNWPVby.PO7ndlb9CoAysOOzijlE0zdtlr2P6KLkpgJUdjFcIKcvG', NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL),
 (22, NULL, 'Puti Mayasari', 'handayani.ibrahim@example.net', '2023-05-05 22:03:28', '$2y$10$icNktaqy4vxU/2pesSNmnemF8f8NygRVNBSdYM8urbCL0ZC4BM4qG', NULL, '2023-05-05 22:03:28', '2023-05-05 22:03:28', NULL, NULL),
-(23, 'fd01ed9963d2692c', 'test', 'test@test.coom', NULL, '$2y$10$5tTgfdnNKRHHjiK8cL0aHOG06ENIqfgjlDxno0cs8D8U7OcrYaZxG', NULL, '2023-05-06 19:57:51', '2023-05-06 19:58:19', NULL, 'c_UvYZg9Tv6mBBTcQ8u_Xq:APA91bG3_NW5_NZ9kMV_Hwg8_U3K0rHpGH87rD-V7x9XbVQX3mSaHPPidOPNg9UNTeE3_l8fzOzSps3FX-4GOa31oOgV02osX9Y2gxtJe4LlyD-T0kC9_1qzWqYPQdWB8a0rXmzeu07n');
+(23, 'fd01ed9963d2692c', 'test', 'test@test.coom', NULL, '$2y$10$5tTgfdnNKRHHjiK8cL0aHOG06ENIqfgjlDxno0cs8D8U7OcrYaZxG', NULL, '2023-05-06 19:57:51', '2023-05-06 19:58:19', NULL, 'c_UvYZg9Tv6mBBTcQ8u_Xq:APA91bG3_NW5_NZ9kMV_Hwg8_U3K0rHpGH87rD-V7x9XbVQX3mSaHPPidOPNg9UNTeE3_l8fzOzSps3FX-4GOa31oOgV02osX9Y2gxtJe4LlyD-T0kC9_1qzWqYPQdWB8a0rXmzeu07n'),
+(24, '11', 'Test', 'ronaldrobi00@gmail', NULL, '$2y$10$ozyUfPeaKEhIcTtFIZ2V9..BMyu7Cxbz1O12WwMEzJhAcBKobGeDC', NULL, '2023-05-12 19:48:32', '2023-05-12 19:48:32', NULL, NULL),
+(25, '12', 'PegawaiBesar', 'besar@gmail.com', NULL, '$2y$10$pD9X8o16G5EK13g62p7OneNluXlqTHp/lCxGafjqcCBjKlCQxMRgW', NULL, '2023-05-12 22:50:56', '2023-05-12 22:50:56', NULL, NULL),
+(26, 'gg', 'qq', 'as@gmail.com', NULL, '$2y$10$m3mZjGWsepHWUR4miBkHEufpK331itZT8owp3ZSr4nMna2/9NkqGa', NULL, '2023-05-12 23:24:15', '2023-05-12 23:24:15', NULL, NULL),
+(28, 'asadassad', 'Aku Manager', 'aku@gmail.com', NULL, '$2y$10$wNu4CTUFhE698NsVML2neOJRo.5ofboE0ZAXjLgevRTp.v7OANkOu', NULL, '2023-05-12 23:36:13', '2023-05-13 00:32:54', NULL, NULL),
+(29, 'sad', 'asdas', 'ooo@gmail.com', NULL, '$2y$10$0PFcRbidKvgs2tMbXmE6MucbGV5CcLOpmScmMbqDI9tLyLq15hxwq', NULL, '2023-05-12 23:39:27', '2023-05-12 23:39:27', NULL, NULL),
+(30, 'sad', 'asdasd', 'sadas@gmail.com', NULL, '$2y$10$6uCXr2JIYW2I/M3hX1aEvuDF/2TZL7W6FmH/65e/Lf4hMV8xK2v8m', NULL, '2023-05-13 00:01:25', '2023-05-13 00:01:25', NULL, NULL),
+(31, 'sadasd', 'sad', '321@gmail.com', NULL, '$2y$10$uU7OlfVi7ZjPfF1c2NkJBe5zH32ix3NsI7m8m5hjRgaNKhhxjIV.e', NULL, '2023-05-13 00:34:35', '2023-05-13 00:34:35', NULL, NULL);
 
 --
 -- Indexes for dumped tables
@@ -1594,6 +1768,12 @@ ALTER TABLE `approval_steps`
 -- Indeks untuk tabel `approval_types`
 --
 ALTER TABLE `approval_types`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indeks untuk tabel `area`
+--
+ALTER TABLE `area`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -1905,6 +2085,12 @@ ALTER TABLE `personal_access_tokens`
   ADD KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`);
 
 --
+-- Indeks untuk tabel `pleton`
+--
+ALTER TABLE `pleton`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeks untuk tabel `pph_range_rules`
 --
 ALTER TABLE `pph_range_rules`
@@ -1953,6 +2139,12 @@ ALTER TABLE `shifts`
   ADD KEY `shifts_branch_id_foreign` (`branch_id`);
 
 --
+-- Indeks untuk tabel `struktur`
+--
+ALTER TABLE `struktur`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indeks untuk tabel `users`
 --
 ALTER TABLE `users`
@@ -1994,6 +2186,12 @@ ALTER TABLE `approval_types`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
+-- AUTO_INCREMENT untuk tabel `area`
+--
+ALTER TABLE `area`
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
 -- AUTO_INCREMENT untuk tabel `attendances`
 --
 ALTER TABLE `attendances`
@@ -2033,7 +2231,7 @@ ALTER TABLE `bpjstk_settings`
 -- AUTO_INCREMENT untuk tabel `branches`
 --
 ALTER TABLE `branches`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT untuk tabel `breaks`
@@ -2063,7 +2261,7 @@ ALTER TABLE `designations`
 -- AUTO_INCREMENT untuk tabel `employees`
 --
 ALTER TABLE `employees`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT untuk tabel `employee_groups`
@@ -2093,7 +2291,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT untuk tabel `files`
 --
 ALTER TABLE `files`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT untuk tabel `groups`
@@ -2228,6 +2426,12 @@ ALTER TABLE `personal_access_tokens`
   MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT untuk tabel `pleton`
+--
+ALTER TABLE `pleton`
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+
+--
 -- AUTO_INCREMENT untuk tabel `pph_range_rules`
 --
 ALTER TABLE `pph_range_rules`
@@ -2249,7 +2453,7 @@ ALTER TABLE `roles`
 -- AUTO_INCREMENT untuk tabel `schedules`
 --
 ALTER TABLE `schedules`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT untuk tabel `settings`
@@ -2261,13 +2465,19 @@ ALTER TABLE `settings`
 -- AUTO_INCREMENT untuk tabel `shifts`
 --
 ALTER TABLE `shifts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT untuk tabel `struktur`
+--
+ALTER TABLE `struktur`
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
