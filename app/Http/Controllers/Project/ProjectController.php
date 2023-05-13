@@ -32,6 +32,21 @@ class ProjectController extends AdminBaseController
             return $this->exceptionError($e->getMessage());
         }
     }
+    //get data area by branch id and pleton by id area
+    public function getDataArea(Request $request)
+    {
+        try {
+            $project = DB::table('area')->select('area.*')->where('area.id_branch',$request->id)->whereNull('area.deleted_at')->paginate(10);
+            //foreach project 
+            foreach($project as $key => $value){
+                $pleton = DB::table('pleton')->select('pleton.*')->where('pleton.id_area',$value->id)->whereNull('pleton.deleted_at')->get();
+                $project[$key]->pleton = $pleton;
+            }
+            return $this->respond($project);
+        } catch (\Exception $e) {
+            return $this->exceptionError($e->getMessage());
+        }
+    }
     public function getDataEmploy(Request $request)
     {
         try {
