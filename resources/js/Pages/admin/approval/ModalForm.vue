@@ -32,6 +32,35 @@ const getStatusValue = (value) => {
         return 'primary';
     }
 }
+
+//make update function
+const update = async (id, status) => {
+    isLoading.value = true;
+    try {
+        const response = await axios.post(route('approval.updateStatusLembur'), {
+            id: id,
+            status: status,
+        });
+        if (response.status === 200) {
+            notify({
+                title: 'Success',
+                text: 'Data has been updated',
+                type: 'success'
+            });
+            emit('successSubmit');
+            emit('close');
+        }
+    } catch (error) {
+        notify({
+            title: 'Error',
+            text: error.response.data.message,
+            type: 'error'
+        });
+    } finally {
+        isLoading.value = false;
+    }
+}
+
 </script>
 
 <template>
@@ -78,6 +107,26 @@ const getStatusValue = (value) => {
                         <div class="font-medium text-sm text-slate-600 mb-1">Branch</div>
                         <div class="font-normal text-sm text-slate-500 capitalize">
                             {{ data.branch }}
+                        </div>
+                    </div>
+
+                    <div v-if="props.data.type == 'Approval Lembur'">
+                        <div class="font-medium text-sm text-slate-600 mb-1">Keterangan</div>
+                        <div class="font-normal text-sm text-slate-500 capitalize">
+                            {{ data.keterangan }}
+                        </div>
+                    </div>
+
+                    <div v-if="props.data.type == 'Approval Lembur'">
+                        <div class="font-medium text-sm text-slate-600 mb-1">Clock In</div>
+                        <div class="font-normal text-sm text-slate-500 capitalize">
+                            {{ data.jam_masuk }}
+                        </div>
+                    </div>
+                    <div v-if="props.data.type == 'Approval Lembur'">
+                        <div class="font-medium text-sm text-slate-600 mb-1">Clock Out</div>
+                        <div class="font-normal text-sm text-slate-500 capitalize">
+                            {{ data.jam_keluar }}
                         </div>
                     </div>
                 </div>
@@ -188,13 +237,20 @@ const getStatusValue = (value) => {
             </section>
         </template>
         <template v-slot:footer>
-            <div class="flex flex-wrap justify-end space-x-2">
-                <VButton label="Reject" :is-loading="isLoading" type="danger" @click="openModalForm = true, itemSelected = data, actionType = 'reject'" v-if="data.status === 'awaiting'"/>
-                <VButton label="Approve" :is-loading="isLoading" type="success" @click="openModalForm = true, itemSelected = data, actionType = 'approve'" v-if="data.status === 'awaiting'"/>
+            <div class="flex flex-wrap justify-end space-x-2" v-if="props.data.type != 'Approval Lembur'">
+                <VButton label="Reject" :is-loading="isLoading" type="danger"
+                    @click="openModalForm = true, itemSelected = data, actionType = 'reject'"
+                    v-if="data.status === 'awaiting'" />
+                <VButton label="Approve" :is-loading="isLoading" type="success"
+                    @click="openModalForm = true, itemSelected = data, actionType = 'approve'"
+                    v-if="data.status === 'awaiting'" />
             </div>
+
         </template>
     </VDialog>
-    <VModalRejectForm :data="itemSelected" :open-dialog="openModalForm" @close="itemSelected = ref({}), openModalForm = false" @successSubmit="$emit('close'), $emit('successSubmit'), form = ref({})" :action="actionType"/>
+    <VModalRejectForm :data="itemSelected" :open-dialog="openModalForm"
+        @close="itemSelected = ref({}), openModalForm = false"
+        @successSubmit="$emit('close'), $emit('successSubmit'), form = ref({})" :action="actionType" />
 </template>
 
 <style>

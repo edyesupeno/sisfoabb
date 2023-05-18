@@ -38,6 +38,12 @@ class GetPayrollSettingMenu
                 'url' => route('settings.payroll.components.index'),
                 'icon' =>  'VGear',
                 'can' => 'view_payroll_payroll_components'
+            ],
+            [
+                'text' => 'Setting Overtime Pay',
+                'url' => route('settings.payroll.overtime.index'),
+                'icon' =>  'VMoney',
+                'can' => 'view_payroll_payroll_components'
             ]
         ];
 

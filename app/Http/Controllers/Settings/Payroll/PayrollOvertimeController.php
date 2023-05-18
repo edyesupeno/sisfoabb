@@ -1,8 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Settings\Payroll;
-//db
-use Illuminate\Support\Facades\DB;
+
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 use App\Actions\Options\GetBranchOptions;
@@ -14,7 +13,7 @@ use App\Http\Requests\Settings\Payroll\UpdatePayrollComponentRequest;
 use App\Http\Resources\Settings\Payroll\PayrollComponentListResource;
 use App\Http\Resources\Settings\Payroll\SubmitPayrollComponentResource;
 
-class PayrollComponentController extends AdminBaseController
+class PayrollOvertimeController extends AdminBaseController
 {
     public function __construct(
         PayrollComponentService $payrollComponentService,
@@ -32,61 +31,6 @@ class PayrollComponentController extends AdminBaseController
             $data = $this->payrollComponentService->getData($request);
 
             $result = new PayrollComponentListResource($data);
-            return $this->respond($result);
-        } catch (\Exception $e) {
-            return $this->exceptionError($e->getMessage());
-        }
-    }
-
-    //getComponentListLembur
-    public function getComponentListLembur(Request $request)
-    {
-        try {
-           //get $data
-           $data = DB::table('overtime_payroll')->paginate(1);
-           $result = $data;
-            return $this->respond($result);
-        } catch (\Exception $e) {
-            return $this->exceptionError($e->getMessage());
-        }
-    }
-    //add lembur
-    public function addLembur(Request $request)
-    {
-        try {
-            //insert table with form name
-            $data = DB::table('overtime_payroll')->insert([
-                'working_time' => $request->working_time,
-                'persen' => $request->persen,
-            ]);
-            $result = $data;
-            return $this->respond($result);
-        } catch (\Exception $e) {
-            return $this->exceptionError($e->getMessage());
-        }
-    }
-    //edit lembur
-    public function editLembur(Request $request)
-    {
-        try {
-            //update table with form name
-            $data = DB::table('overtime_payroll')->where('id', $request->id)->update([
-                'working_time' => $request->working_time,
-                'persen' => $request->persen,
-            ]);
-            $result = $data;
-            return $this->respond($result);
-        } catch (\Exception $e) {
-            return $this->exceptionError($e->getMessage());
-        }
-    }
-    //delete lembur
-    public function deleteLembur(Request $request)
-    {
-        try {
-            //delete table with form name
-            $data = DB::table('overtime_payroll')->where('id', $request->id)->delete();
-            $result = $data;
             return $this->respond($result);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
