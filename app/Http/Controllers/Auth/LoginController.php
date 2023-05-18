@@ -42,7 +42,7 @@ class LoginController extends Controller
     public function showLoginForm()
     {
         return Inertia::render('admin/auth/login', [
-            "title" => 'BattleHr | Login'
+            "title" => 'ERP ABB | Login'
         ]);
     }
 
@@ -50,7 +50,7 @@ class LoginController extends Controller
     {
         Authentication::logoutUser();
         return Inertia::render('admin/auth/success-reset', [
-            "title" => 'BattleHr | Reset Password'
+            "title" => 'ERP ABB | Reset Password'
         ]);
     }
 

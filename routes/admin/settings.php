@@ -243,6 +243,35 @@ Route::prefix('settings')->name('settings.')->group(function () {
                 Route::delete('{id}/delete-payroll-employee', 'deletePayrollEmployee')->name('delete');
             });
         });
+        Route::prefix('overtime')->name('overtime.')->group(function () {
+            Route::get('/', 'payrollLemburIndex')->name('index');
+            Route::controller(PayrollComponentController::class)->group(function () {
+                Route::get('get-data', 'getComponentList')->name('getdata');
+                Route::get('get-data', 'getComponentListLembur')->name('getdatalembur');
+                //addlembur route
+                Route::post('crea-lembur', 'addLembur')->name('addLembur');
+                Route::post('edit-lembur', 'editLembur')->name('editLembur');
+                Route::post('hapus-lembur', 'deleteLembur')->name('deleteLembur');
+                //delete
+                Route::post('create-data', 'createComponent')->name('create');
+                Route::put('{id}/update-data', 'updateComponent')->name('update');
+                Route::delete('{id}/delete-data', 'deleteComponent')->name('delete');
+
+                Route::get('{id}/set-value', 'setValueComponent')->name('setvalue');
+            });
+
+            Route::controller(PayrollBranchComponentController::class)->name('branch.')->group(function () {
+                Route::get('get-payroll-branch', 'getPayrollBranchList')->name('getdata');
+                Route::put('update-payroll-branch', 'updatePayrollBranch')->name('update');
+                Route::delete('{id}/delete-payroll-branch', 'deletePayrollBranch')->name('delete');
+            });
+
+            Route::controller(PayrollEmployeeComponentController::class)->name('employee.')->group(function () {
+                Route::get('get-payroll-employee', 'getPayrollEmployeeList')->name('getdata');
+                Route::put('update-payroll-employee', 'updatePayrollEmployee')->name('update');
+                Route::delete('{id}/delete-payroll-employee', 'deletePayrollEmployee')->name('delete');
+            });
+        });
     });
 
 

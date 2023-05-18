@@ -86,4 +86,26 @@ class PayrollController extends AdminBaseController
             ]
         ]);
     }
+
+    
+    public function payrollLemburIndex(Request $request)
+    {
+        $branchOptions = [
+            'all' => 'All Branches'
+        ];
+        foreach ($this->getBranchOptions->handle() as $key => $value) {
+            $branchOptions[$key] = $value;
+        }
+
+        return Inertia::render($this->source . 'settings/payroll/overtime/index', [
+            "title" => 'ERP ABB | Setting Overtime',
+            "additional" => [
+                'menu' => $this->getPayrollSettingMenu->handle(),
+                'data' => $this->generalSettingService->getPayrollSettings(),
+                'branch_list' => $branchOptions,
+                'branch_filter' => $this->getBranchOptions->handle(),
+                'designation_filter' => $this->getDesignationOptions->handle(),
+            ]
+        ]);
+    }
 }
