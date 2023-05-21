@@ -252,7 +252,7 @@ class ApprovalController extends ApiBaseController
                 $now = date('Y-m-d H:i:s');
                 $lembur = DB::table('lembur')->insert(['type'=>'Approval Lembur','jam_masuk'=>$request->waktu_masuk,'jam_keluar'=>$request->waktu_keluar,'id_employee'=>$request->id_employee,'id_branch'=> $id_branch,'keterangan'=>$request->keterangan,'tanggal'=>$now,'lembur'=>$request->tanggal,'status'=>'awaiting']);
                 $a = 'success';
-                return $this->respond($a);
+                return $this->respond(date('Y-m-d'));
             }else{
                 return $this->respond('belum absen');
             }
