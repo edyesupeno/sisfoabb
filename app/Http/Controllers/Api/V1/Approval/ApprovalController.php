@@ -244,7 +244,7 @@ class ApprovalController extends ApiBaseController
             $id_branch = '';
             foreach ($employee as $key => $value) {
                 //get id branch
-                $id_branch = $value->id_branch;
+                $id_branch = $value->branch_id;
             }
            
             // if($cek->count() > 0){
