@@ -15,7 +15,13 @@ use App\Http\Controllers\Api\V1\Approval\ApprovalController;
 Route::controller(ApprovalController::class)->group(function () {
     Route::get('approvals', 'getApprovalData');
     //make route get lembur data
-    Route::get('lemburs', 'getLemburData');
+    Route::get('lemburs/{id}/{status}', 'getLemburData');
+    Route::get('lemburs/{id}', 'getDetailLembur');
+    Route::get('lemburs/manager/{id}/{status}/{page}/{datestart}/{dateend}/{sort}', 'getLemburDataManager');
+    Route::get('lembursbyid/{id}/{status}', 'getLemburDataById');
+    //route delete
+    Route::post('lemburs/cancel', 'deleteLembur');
+    Route::get('lemburs/test', 'p');
     //make route approve lembur
     Route::post('lemburs/approve', 'approveLembur');
     //make route reject lembur

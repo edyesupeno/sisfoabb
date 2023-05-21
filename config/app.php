@@ -71,7 +71,7 @@ return [
     |
     */
 
-    'timezone' => env('DASHBOARD_TIMEZONE', 'UTC'),
+    'timezone' => 'Asia/Jakarta',
 
     /*
     |--------------------------------------------------------------------------
