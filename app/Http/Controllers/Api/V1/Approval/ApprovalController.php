@@ -247,15 +247,15 @@ class ApprovalController extends ApiBaseController
                 $id_branch = $value->id_branch;
             }
            
-            if($cek->count() > 0){
+            // if($cek->count() > 0){
                 //datetime now
                 $now = date('Y-m-d H:i:s');
                 $lembur = DB::table('lembur')->insert(['type'=>'Approval Lembur','jam_masuk'=>$request->waktu_masuk,'jam_keluar'=>$request->waktu_keluar,'id_employee'=>$request->id_employee,'id_branch'=> $id_branch,'keterangan'=>$request->keterangan,'tanggal'=>$now,'lembur'=>$request->tanggal,'status'=>'awaiting']);
                 $a = 'success';
-                return $this->respond(date('Y-m-d'));
-            }else{
-                return $this->respond(date('Y-m-d'));
-            }
+                return $this->respond($a);
+            // }else{
+            //     return $this->respond(date('Y-m-d'));
+            // }
             
             
         } catch (\Exception $e) {
