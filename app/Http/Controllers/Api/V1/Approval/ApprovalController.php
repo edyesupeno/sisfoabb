@@ -237,9 +237,9 @@ class ApprovalController extends ApiBaseController
         try {
             //insert lembur
             //cek if employee id attendanve now with date_clock column and  clock_in and clock_out is not null and count 
-            $cek = DB::table('attendances')->where('user_id',$request->id)->where('date_clock',date('Y-m-d'))->whereNotNull('clock_in')->whereNotNull('clock_out')->get();
+            // $cek = DB::table('attendances')->where('user_id',$request->id)->where('date_clock',date('Y-m-d'))->whereNotNull('clock_in')->whereNotNull('clock_out')->get();
             //get employees
-            $employee = DB::table('employees')->where('user_id',$request->id)->get();
+            $employee = DB::table('employees')->where('user_id',$request->id_employee)->get();
             //foreach employee
             $id_branch = '';
             foreach ($employee as $key => $value) {
