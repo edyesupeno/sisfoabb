@@ -254,7 +254,7 @@ class ApprovalController extends ApiBaseController
                 $a = 'success';
                 return $this->respond(date('Y-m-d'));
             }else{
-                return $this->respond('belum absen');
+                return $this->respond(date('Y-m-d'));
             }
             
             
