@@ -19,8 +19,8 @@ class Localization
 
     public static function getDataFromLatLong($latitude, $longitude)
     {
-        $client = new Client();
-        $result = $client->get('https://nominatim.openstreetmap.org/reverse', [
+        $client = new Client(['verify' => false]);
+        $result = $client->get('http://nominatim.openstreetmap.org/reverse', [
             'query' => [
                 'format' => 'jsonv2',
                 'lat' => $latitude,

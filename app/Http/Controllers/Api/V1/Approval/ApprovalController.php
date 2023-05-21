@@ -239,12 +239,18 @@ class ApprovalController extends ApiBaseController
             //cek if employee id attendanve now with date_clock column and  clock_in and clock_out is not null and count 
             $cek = DB::table('attendances')->where('user_id',$request->id)->where('date_clock',date('Y-m-d'))->whereNotNull('clock_in')->whereNotNull('clock_out')->get();
             //get employees
-            $employee = DB::table('users')->where('id',$request->id)->get();
-            $employee = $employee[0];
+            $employee = DB::table('employees')->where('user_id',$request->id)->get();
+            //foreach employee
+            $id_branch = '';
+            foreach ($employee as $key => $value) {
+                //get id branch
+                $id_branch = $value->id_branch;
+            }
            
             if($cek->count() > 0){
-               
-                $lembur = DB::table('lembur')->insert(['type'=>'Approval Lembur','jam_masuk'=>$request->waktu_masuk,'jam_keluar'=>$request->waktu_keluar,'id_employee'=>$request->id_employee,'id_branch'=>$employee->id_branch,'keterangan'=>$request->keterangan,'tanggal'=>$request->tanggal,'status'=>'awaiting']);
+                //datetime now
+                $now = date('Y-m-d H:i:s');
+                $lembur = DB::table('lembur')->insert(['type'=>'Approval Lembur','jam_masuk'=>$request->waktu_masuk,'jam_keluar'=>$request->waktu_keluar,'id_employee'=>$request->id_employee,'id_branch'=> $id_branch,'keterangan'=>$request->keterangan,'tanggal'=>$now,'lembur'=>$request->tanggal,'status'=>'awaiting']);
                 $a = 'success';
                 return $this->respond($a);
             }else{
