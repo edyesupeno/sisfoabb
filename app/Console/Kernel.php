@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('attendance:force-clockout')->everyMinute();
-        // $schedule->command('reminder:clockin')->everyMinute();
+        $schedule->command('reminder:clockin')->everyMinute();
 
         $settings = Setting::whereIn('key', ['date_reset_leave_quota'])->get(['key', 'value'])->keyBy('key')->transform(function ($setting) {
             return $setting->value;

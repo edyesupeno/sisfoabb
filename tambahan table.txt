@@ -1,0 +1,23 @@
+
+
+CREATE TABLE `lembur` (
+  `id` int(255) NOT NULL,
+  `id_employee` varchar(255) NOT NULL,
+  `type` varchar(255) NOT NULL DEFAULT 'Approval Lembur',
+  `id_branch` varchar(255) NOT NULL,
+  `keterangan` text NOT NULL,
+  `jam_masuk` varchar(255) NOT NULL,
+  `jam_keluar` varchar(255) NOT NULL,
+  `bukti_foto` text DEFAULT NULL,
+  `status` varchar(255) NOT NULL,
+  `deleted_at` varchar(255) DEFAULT NULL,
+  `tanggal` timestamp NOT NULL DEFAULT current_timestamp(),
+  `lembur` timestamp NOT NULL DEFAULT current_timestamp(),
+  `reason` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+CREATE TABLE `overtime_payroll` (
+  `id` int(255) NOT NULL,
+  `working_time` varchar(255) NOT NULL,
+  `persen` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
