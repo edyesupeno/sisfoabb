@@ -39,6 +39,7 @@ class PayrollComponentListResource extends ResourceCollection
             'id' => $data->id,
             'name' => $data->name,
             'type' => $data->type,
+            'pay_type' => $data->pay_type,
             'is_mandatory' => $data->is_mandatory,
             'is_editable' => $data->is_editable,
             'is_taxable' => $data->is_taxable,

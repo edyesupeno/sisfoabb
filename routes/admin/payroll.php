@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Payroll\Payroll\PayrollController;
-
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,5 +28,6 @@ Route::prefix('payroll')->name('payroll.')->group(function () {
         Route::get('{id}/payroll-employee/edit', 'payrollEmployeeEdit')->name('payrollemployee.edit');
         Route::put('{id}/payroll-employee/update', 'payrollEmployeeUpdate')->name('payrollemployee.update');
         Route::delete('{id}/payroll-employee/delete', 'payrollEmployeeDelete')->name('payrollemployee.delete');
+
     });
 });

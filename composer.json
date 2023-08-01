@@ -22,7 +22,7 @@
         "spatie/laravel-activitylog": "^4.6",
         "spatie/laravel-permission": "^5.5",
         "tightenco/ziggy": "^1.5",
-        "yajra/laravel-datatables": "^9.0"
+        "yajra/laravel-datatables": "9.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",
@@ -73,7 +73,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true
-        }
+        },
+        "process-timeout": 3600
     },
     "minimum-stability": "dev",
     "prefer-stable": true

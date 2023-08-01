@@ -64,7 +64,7 @@ const updateAction = ref(false)
 const itemSelected = ref({})
 const openAlert = ref(false)
 const openModalForm = ref(false)
-const heads = ["Name", "Type", "Editable", "Taxable", ""]
+const heads = ["Name", "Type", "Pay Type", "Editable", "Taxable", ""]
 const isLoading = ref(true)
 const filter = ref({})
 
@@ -260,6 +260,10 @@ onMounted(() => {
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.name }} {{ data.is_mandatory ? '- Default' : '' }} </td>
                                 <td class="px-4 whitespace-nowrap h-16 capitalize">
                                     <VBadge :text="data.type" :color="data.type === 'earning' ? 'success' : 'danger'"
+                                        size="sm" />
+                                </td>
+                                <td class="px-4 whitespace-nowrap h-16 capitalize">
+                                    <VBadge :text="data.pay_type.replace(/_/g, ' ')" color="primary"
                                         size="sm" />
                                 </td>
                                 <td class="px-4 whitespace-nowrap h-16 capitalize">

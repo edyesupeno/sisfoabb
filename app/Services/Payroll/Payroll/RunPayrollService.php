@@ -65,6 +65,8 @@ class RunPayrollService
                 'type' => $q->payroll_component_detail->type,
                 'is_editable' => $q->payroll_component_detail->is_editable,
                 'is_taxable' => $q->payroll_component_detail->is_taxable,
+                'pay_type' => $q->payroll_component_detail->pay_type,
+                'total_cross' => $q->total_cross,
                 'value' => (int)$q->value,
                 'amount' => number_format($q->value, 2, ',', '.')
             ];
@@ -85,6 +87,8 @@ class RunPayrollService
                 'type' => $q->payroll_component_detail->type,
                 'is_editable' => $q->payroll_component_detail->is_editable,
                 'is_taxable' => $q->payroll_component_detail->is_taxable,
+                'pay_type' => $q->payroll_component_detail->pay_type,
+                'total_cross' => $q->total_cross,
                 'value' => (int)$q->value,
                 'amount' => number_format($q->value, 2, ',', '.')
             ];
@@ -185,9 +189,11 @@ class RunPayrollService
     {
         // Create Payroll Slip
         if ($branch_slip !== null) {
+            // ALL
             $employees = Employee::whereHas('payroll_employee_base_salary')->with(['payroll_employee_base_salary'])->get();
             $payroll_slip = $branch_slip;
         } else {
+            // BRANCH ID
             $employees = Employee::whereHas('payroll_employee_base_salary')->with(['payroll_employee_base_salary'])->where('branch_id', $branch_id)->get();
             $payroll_slip = $this->createSlipPayroll($start_date, $branch_id, $end_date);
         }

@@ -17,6 +17,7 @@ class PayrollComponent extends Model
         'custom_attribute' => 'array',
         'is_mandatory' => 'boolean',
         'is_taxable' => 'boolean',
+        'is_atendance' => 'boolean',
         'is_editable' => 'boolean',
     ];
 

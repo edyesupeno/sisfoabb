@@ -50,6 +50,43 @@ class AttendanceOverviewService
         return $result;
     }
 
+    public function getAttendanceOverview2($request)
+    {
+        $filter_date = $request->filter_date ?: Carbon::now();
+        $filter_branch = $request->filter_branch ?: 1;
+        
+        $day = Carbon::parse($filter_date)->format('d');
+        $month = Carbon::parse($filter_date)->format('m');
+        $year = Carbon::parse($filter_date)->format('Y');
+        if ($filter_branch == -10) {
+            $employees = Employee::get();
+        }else{
+             $employees = Employee::where('branch_id', $filter_branch)->get();
+        }
+       
+        $attendances = Attendance::whereDay('date_clock', $day)->whereMonth('date_clock', $month)->whereYear('date_clock', $year)->whereIn('user_id', $employees->pluck('user_id'))->get();
+        $schedules = Schedule::whereIn('user_id', $employees->pluck('user_id'))->whereDay('date', $day)->whereMonth('date', $month)->whereYear('date', $year)->get();
+        $leaves = Leave::whereIn('employee_id', $employees->pluck('id'))->where(function ($query) use ($month) {
+                    $query->whereMonth('start_date', $month)->orWhereMonth('end_date', $month);
+                })->where(function ($query) use ($year) {
+                    $query->whereYear('start_date', $year)->orWhereYear('end_date', $year);
+                })->where(function ($query) use ($day) {
+                    $query->whereDay('start_date', $day)->whereDay('end_date', $day);
+                })->where('status', 'approved')->get();
+
+        $attendance_status = new CalculateAttendanceStatus($attendances);
+        $result = [
+            'total_present' => $attendance_status->calculatePresentStatus(),
+            'total_absent' => $attendance_status->calculateAbsentStatus(collect($schedules)->where('is_leave', 0)->all()),
+            'total_late' => $attendance_status->calculateLateStatus(),
+            'total_clockout_early' => $attendance_status->calculateClockoutEarlyStatus(),
+            'total_leaves' => $attendance_status->calculateLeaveStatus($leaves),
+            'total_holiday' => $attendance_status->calculateHolidayStatus($schedules)
+        ];
+
+        return $result;
+    }
+
     public function getAttendanceListDate($request)
     {
         $filter_date = $request->filter_date ?: Carbon::now();

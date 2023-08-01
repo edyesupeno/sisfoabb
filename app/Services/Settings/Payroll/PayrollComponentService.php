@@ -29,7 +29,7 @@ class PayrollComponentService
 
     public function storeData($request)
     {
-        $input = $request->only(['name', 'type', 'is_editable', 'is_taxable']);
+        $input = $request->only(['name', 'type', 'pay_type', 'is_editable', 'is_taxable']);
 
         $payrollComponent = PayrollComponent::create($input);
 

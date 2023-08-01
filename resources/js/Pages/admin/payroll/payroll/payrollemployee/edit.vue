@@ -49,9 +49,12 @@ const addDeductionColor = ref('text-slate-600')
 const isLoading = ref(false)
 const formError = ref({})
 const form = ref({
+    'user_id': props.additional.user_id,
     'paid_on': props.additional.payroll_employee.paid_on,
     'status': props.additional.payroll_employee.status,
     'dateVal': props.additional.payroll_employee.paid_on ? new Date(props.additional.payroll_employee.paid_on) : null,
+    'start_date': props.additional.start_date,
+    'end_date': props.additional.end_date
 })
 const earningComponentOptions = ref({})
 const deductionComponentOptions = ref({})

@@ -19,6 +19,9 @@ use App\Http\Resources\Payroll\Payroll\SubmitPayrollResource;
 use App\Http\Requests\Payroll\Payroll\UpdatePayrollSlipRequest;
 use App\Http\Resources\Payroll\Payroll\PayrollSlipListResource;
 use App\Http\Resources\Payroll\Payroll\PayrollEmployeeListResource;
+use App\Models\PayrollComponent;
+use App\Services\Employee\Employee\AttendanceLogService;
+use App\Services\Employee\Employee\EmployeeService;
 
 class PayrollController extends AdminBaseController
 {
@@ -67,12 +70,14 @@ class PayrollController extends AdminBaseController
 
             // Calculate payroll base on branch selected
             if ($request->branch_id != 'all') {
+                // WITH BRANCH ID
                 DB::beginTransaction();
-                
+
                 $this->runPayrollService->calculatePayroll($request->branch_id, $dates[0], $dates[1]);
 
                 DB::commit();
             } else {
+                // ALL
                 DB::beginTransaction();
 
                 $payroll_slip = $this->runPayrollService->createSlipPayrollAllPlacement($dates[0], $dates[1]);
@@ -151,6 +156,9 @@ class PayrollController extends AdminBaseController
             "title" => 'ERP ABB | Payroll',
             "additional" => [
                 'payroll_employee' => $payrollEmployee,
+                'user_id' => $payrollEmployee->employee_detail->user_id,
+                'start_date' => $payrollEmployee->payroll_slip->date,
+                'end_date' => $payrollEmployee->payroll_slip->end_date,
                 'payroll_date' => Carbon::parse($payrollEmployee->payroll_slip->date)->format('F Y'),
                 'base_salary' => number_format($payrollEmployee->amount, 2, ',', '.'),
                 'total_earning' => number_format($payrollEmployee->earning_total + $payrollEmployee->amount, 2, ',', '.'),
@@ -158,7 +166,7 @@ class PayrollController extends AdminBaseController
                 'take_home_pay' => number_format($payrollEmployee->total_amount, 2, ',', '.'),
                 'earning_components' => $this->runPayrollService->getEarningEmployeeSlipComponents($id),
                 'deduction_components' => $this->runPayrollService->getDeductionEmployeeSlipComponents($payrollEmployee),
-                'payroll_earning_components' => collect($payrollComponent)->where('type', 'earning')->values()->map(function($q) use($payrollEmployee) {
+                'payroll_earning_components' => collect($payrollComponent)->where('type', 'earning')->values()->map(function ($q) use ($payrollEmployee) {
                     $value = Calculate::calculateDefaultAmountComponent($q, $payrollEmployee->employee_id, $payrollEmployee->employee_detail->branch_id);
 
                     return [
@@ -188,11 +196,110 @@ class PayrollController extends AdminBaseController
         ]);
     }
 
-    public function payrollEmployeeUpdate($id, UpdatePayrollSlipRequest $request)
+    public function payrollEmployeeUpdate($id, UpdatePayrollSlipRequest $request, AttendanceLogService $attendanceLogService)
     {
+
+        $request->merge(['filter_date' => [Carbon::parse($request->start_date)->toISOString(), Carbon::parse($request->end_date)->toISOString()]]);
+
+        $earningComponents = [];
+        foreach ($request->earningComponents as $i => $val) {
+            $payType = PayrollComponent::find($val['payroll_component_id'])->pay_type;
+            $totalCross = 1;
+            switch ($payType) {
+                case "fix":
+                    $totalCross = 1;
+                    break;
+                case "attendance":
+                    $attendance = $attendanceLogService->getAttendanceLogOverview($request, $request);
+                    $totalCross = $attendance['total_present'] + $attendance['total_late'];
+                    break;
+                case "overtime_days":
+                    $lembur = DB::table('lembur')
+                        ->where('lembur', '>=', $request->start_date)
+                        ->where('lembur', '<=', $request->end_date)
+                        ->where('id_employee', $request->user_id)
+                        ->where('status', 'approved')
+                        ->count();
+                    $totalCross = $lembur;
+                    break;
+                case "overtime_hours":
+                    $lembur = DB::table('lembur')
+                        ->where('lembur', '>=', $request->start_date)
+                        ->where('lembur', '<=', $request->end_date)
+                        ->where('id_employee', $request->user_id)
+                        ->where('status', 'approved')
+                        ->get()->map(function ($item) {
+                            $startTime = strtotime($item->jam_masuk);
+                            $endTime = strtotime($item->jam_keluar);
+                            $diffInSeconds = $endTime - $startTime;
+                            $hours = floor($diffInSeconds / 3600);
+                            $minutes = floor(($diffInSeconds % 3600) / 60);
+                            if ($minutes >= 30) {
+                                $hours += 1;
+                            }
+                            return (int)$hours;
+                        });
+                    $totalCross = $lembur->sum();
+                    break;
+            }
+            $val['total_cross'] = $totalCross;
+            $earningComponents[] = $val;
+        }
+
+        $deductionComponents = [];
+        foreach ($request->deductionComponents as $i => $val) {
+            if ($i > 0) {
+                $payType = PayrollComponent::find($val['payroll_component_id'])->pay_type;
+                $totalCross = 1;
+                switch ($payType) {
+                    case "fix":
+                        $totalCross = 1;
+                        break;
+                    case "attendance":
+                        $attendance = $attendanceLogService->getAttendanceLogOverview($request, $request);
+                        $totalCross = $attendance['total_present'] + $attendance['total_late'];
+                        break;
+                    case "overtime_days":
+                        $lembur = DB::table('lembur')
+                            ->where('lembur', '>=', $request->start_date)
+                            ->where('lembur', '<=', $request->end_date)
+                            ->where('id_employee', $request->user_id)
+                            ->where('status', 'approved')
+                            ->count();
+                        $totalCross = $lembur;
+                        break;
+                    case "overtime_hours":
+                        $lembur = DB::table('lembur')
+                            ->where('lembur', '>=', $request->start_date)
+                            ->where('lembur', '<=', $request->end_date)
+                            ->where('id_employee', $request->user_id)
+                            ->where('status', 'approved')
+                            ->get()->map(function ($item) {
+                                $startTime = strtotime($item->jam_masuk);
+                                $endTime = strtotime($item->jam_keluar);
+                                $diffInSeconds = $endTime - $startTime;
+                                $hours = floor($diffInSeconds / 3600);
+                                $minutes = floor(($diffInSeconds % 3600) / 60);
+                                if ($minutes >= 30) {
+                                    $hours += 1;
+                                }
+                                return (int)$hours;
+                            });
+                        $totalCross = $lembur->sum();
+                        break;
+                }
+                $val['total_cross'] = $totalCross;
+            } else {
+                $val['total_cross'] = 1;
+            }
+            $deductionComponents[] = $val;
+        }
+
+        $request->merge(['earningComponents' => $earningComponents, 'deductionComponents' => $deductionComponents]);
+
         try {
             $slip = $this->runPayrollService->updateStatusEmployeeSlip($id, $request);
-            $this->runPayrollService->updateEmployeeSlip($slip, $request);          
+            $this->runPayrollService->updateEmployeeSlip($slip, $request);
 
             $result = new SubmitPayrollResource(true, 'Success Update Payroll');
             return $this->respond($result);

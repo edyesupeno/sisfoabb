@@ -39,6 +39,7 @@
         "@vueform/multiselect": "^2.5.7",
         "@vuepic/vue-datepicker": "^3.6.1",
         "@vueup/vue-quill": "^1.0.1",
+        "caniuse-lite": "^1.0.30001517",
         "chart.js": "^4.3.0",
         "dayjs": "^1.11.7",
         "flatpickr": "^4.6.13",

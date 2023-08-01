@@ -12,16 +12,20 @@ use App\Models\BpjstkComponent;
 use App\Models\PayrollSlipComponent;
 use App\Actions\Utility\Attendance\CalculateAttendanceStatus;
 use App\Actions\Utility\Attendance\CalculateAttendanceWorkHours;
+use App\Services\Employee\Employee\AttendanceLogService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class Calculate
 {
+
     public static function getSettingRelated()
     {
         // Get setting related to attendance
         $settings = Setting::whereIn('key', ['payroll_istaxable'])->get(['key', 'value'])->keyBy('key')
-        ->transform(function ($setting) {
-            return $setting->value;
-        })->toArray();
+            ->transform(function ($setting) {
+                return $setting->value;
+            })->toArray();
 
         return $settings;
     }
@@ -93,9 +97,53 @@ class Calculate
                     'branch_id' => $branch_id,
                 ];
 
+                $totalCross = 1;
+                switch ($component->pay_type) {
+                    case "fix":
+                        $totalCross = 1;
+                        break;
+                    case "attendance":
+                        $rq = app(Request::class);
+                        $rq->merge([
+                            'filter_date' => [Carbon::parse($start_date)->toISOString(), Carbon::parse($end_date)->toISOString()],
+                            'user_id' => $employeeSlip->employee_detail->user_id
+                        ]);
+                        $attendance = app(AttendanceLogService::class)->getAttendanceLogOverview($rq, $rq);
+                        $totalCross = $attendance['total_present'] + $attendance['total_late'];
+                        break;
+                    case "overtime_days":
+                        $lembur = DB::table('lembur')
+                            ->where('lembur', '>=', $start_date)
+                            ->where('lembur', '<=', $end_date)
+                            ->where('id_employee', $employeeSlip->employee_detail->user_id)
+                            ->where('status', 'approved')
+                            ->count();
+                        $totalCross = $lembur;
+                        break;
+                    case "overtime_hours":
+                        $lembur = DB::table('lembur')
+                            ->where('lembur', '>=', $start_date)
+                            ->where('lembur', '<=', $end_date)
+                            ->where('id_employee', $employeeSlip->employee_detail->user_id)
+                            ->where('status', 'approved')
+                            ->get()->map(function ($item) {
+                                $startTime = strtotime($item->jam_masuk);
+                                $endTime = strtotime($item->jam_keluar);
+                                $diffInSeconds = $endTime - $startTime;
+                                $hours = floor($diffInSeconds / 3600);
+                                $minutes = floor(($diffInSeconds % 3600) / 60);
+                                if ($minutes >= 30) {
+                                    $hours += 1;
+                                }
+                                return (int)$hours;
+                            });
+                        $totalCross = $lembur->sum();
+                        break;
+                }
+
                 if ($component->type === 'deduction') {
                     // Count deduction each component and push into array
-                    $deductionEachComponent = self::countDeductionEachComponent($calculateDataComponent);
+                    $deductionEachComponent = self::countDeductionEachComponent($calculateDataComponent) * $totalCross;
                     $amount = round($deductionEachComponent, 2, PHP_ROUND_HALF_UP);
                     $data = [
                         'employee_id' => $employeeSlip->employee_detail->id,
@@ -107,12 +155,13 @@ class Calculate
                     $slipComponent = [
                         'payroll_employee_slip_id' => $employeeSlip->id,
                         'payroll_component_id' => $component->id,
-                        'value' => $amount
+                        'value' => $amount,
+                        'total_cross' => $totalCross
                     ];
                     PayrollSlipComponent::create($slipComponent);
                 } else {
                     // Count earning each component and push into array  
-                    $earningEachComponent = self::countEarningEachComponent($calculateDataComponent);
+                    $earningEachComponent = self::countEarningEachComponent($calculateDataComponent) * $totalCross;
                     $amount = round($earningEachComponent, 2, PHP_ROUND_HALF_UP);
                     $data = [
                         'employee_id' => $employeeSlip->employee_detail->id,
@@ -124,7 +173,8 @@ class Calculate
                     $slipComponent = [
                         'payroll_employee_slip_id' => $employeeSlip->id,
                         'payroll_component_id' => $component->id,
-                        'value' => $amount
+                        'value' => $amount,
+                        'total_cross' => $totalCross
                     ];
 
                     PayrollSlipComponent::create($slipComponent);
@@ -143,7 +193,7 @@ class Calculate
             } else {
                 $taxableResult = 0;
             }
-            
+
             $updateAmountEmployeeSlip['tax_value'] = $taxableResult;
             $updateAmountEmployeeSlip['earning_total'] = array_sum(array_column($earningResult, 'amount'));
             $updateAmountEmployeeSlip['deduction_total'] = array_sum(array_column($deductionResult, 'amount')) + $bpjskResult +  $bpjstkResult['JHT'] + $bpjstkResult['JKM'] + $bpjstkResult['JP'] + $bpjstkResult['JKK'] + $taxableResult;
@@ -165,17 +215,22 @@ class Calculate
     }
 
     public static function countUpdatedComponentPayroll(
-        $slip, $component_earning, $component_deduction, $taxable_component_earning, $taxable_component_deduction
-    ){
+        $slip,
+        $component_earning,
+        $component_deduction,
+        $taxable_component_earning,
+        $taxable_component_deduction
+    ) {
         // Delete All Current Slip Component
         PayrollSlipComponent::where('payroll_employee_slip_id', $slip->id)->delete();
 
         // Create a new income and deduction component
-        foreach($component_earning as $earning) {
+        foreach ($component_earning as $earning) {
             $slipComponent = [
                 'payroll_employee_slip_id' => $slip->id,
                 'payroll_component_id' => $earning['payroll_component_id'],
-                'value' => $earning['value']
+                'total_cross' => $earning['total_cross'],
+                'value' => $earning['value'],
             ];
             PayrollSlipComponent::create($slipComponent);
         }
@@ -184,6 +239,7 @@ class Calculate
             $slipComponent = [
                 'payroll_employee_slip_id' => $slip->id,
                 'payroll_component_id' => $deduction['payroll_component_id'],
+                'total_cross' => $deduction['total_cross'],
                 'value' => $deduction['value']
             ];
             PayrollSlipComponent::create($slipComponent);
@@ -203,7 +259,7 @@ class Calculate
         } else {
             $taxableResult = 0;
         }
-        
+
         $updateAmountEmployeeSlip['tax_value'] = $taxableResult;
         $updateAmountEmployeeSlip['earning_total'] = $earningResult;
         $updateAmountEmployeeSlip['deduction_total'] = $deductionResult + $bpjskResult +  $bpjstkResult['JHT'] + $bpjstkResult['JKM'] + $bpjstkResult['JP'] + $bpjstkResult['JKK'] + $taxableResult;
@@ -415,7 +471,7 @@ class Calculate
         $component = $calculateDataComponent['component'];
         $employee_id = $calculateDataComponent['employee_id'];
         $branch_id = $calculateDataComponent['branch_id'];
-        
+
         $amount = self::calculateDefaultAmountComponent($component, $employee_id, $branch_id);
 
         return $amount;
@@ -460,11 +516,11 @@ class Calculate
         $employeeComponentCheck = isset($employeeComponent) && $employeeComponent->default_amount !== null;
         $branchComponentCheck = isset($branchComponent) && $branchComponent->default_amount !== null;
 
-        if($employeeComponentCheck) {
+        if ($employeeComponentCheck) {
             return $employeeComponent->default_amount;
-        }elseif ($branchComponentCheck) {
+        } elseif ($branchComponentCheck) {
             return $branchComponent->default_amount;
-        }else{
+        } else {
             return 0;
         }
     }
