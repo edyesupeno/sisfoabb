@@ -73,7 +73,9 @@ const getData = debounce(async (page) => {
 const getData2 = debounce(async (page) => {
     axios.get(route('approval.getlembur'), {
         params: {
-            page: page
+            page: page,
+            // employee_id: '1',
+            // filter_date: ['2023-06-01T17:00:00.000Z', '2023-08-02T17:00:00.000Z']
         }
     }).then((res) => {
         query2.value = res.data.data

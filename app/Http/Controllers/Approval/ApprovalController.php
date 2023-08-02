@@ -9,6 +9,8 @@ use App\Http\Controllers\AdminBaseController;
 use App\Http\Requests\Approval\RejectApprovalRequest;
 use App\Http\Resources\Approval\ApprovalListResource;
 use App\Http\Resources\Approval\SubmitApprovalResource;
+use Carbon\Carbon;
+
 //DB
 
 
@@ -18,7 +20,7 @@ class ApprovalController extends AdminBaseController
         ApprovalService $approvalService,
     ) {
         $this->approvalService = $approvalService;
-        
+
         $this->title = "ERP ABB | Approval";
         $this->path = "approval/index";
         $this->data = [];
@@ -28,8 +30,8 @@ class ApprovalController extends AdminBaseController
     {
         try {
             $data = $this->approvalService->getData($request);
-           //get lembur from db 
-            
+            //get lembur from db 
+
 
             $result = new ApprovalListResource($data);
             return $this->respond($result);
@@ -39,11 +41,17 @@ class ApprovalController extends AdminBaseController
     }
 
     //make get table lembur
-    public function getLembur()
+    public function getLembur(Request $request)
     {
+        $filter_date = $request->filter_date ?? null;
+        $employee_id = $request->employee_id ?? null;
         try {
-           //get lembur query join with user and branch
-              $lembur = DB::table('lembur')->select('lembur.*','lembur.tanggal as created_at','users.name as created_by','branches.name as branch')->join('users', 'users.id', '=', 'lembur.id_employee')->join('branches', 'branches.id', '=', 'lembur.id_branch')->whereNull('lembur.deleted_at')->paginate(10);
+            //get lembur query join with user and branch
+            if ($filter_date != null && $employee_id != null) {
+                $lembur = DB::table('lembur')->select('lembur.*', 'lembur.tanggal as created_at', 'users.name as created_by', 'branches.name as branch')->join('users', 'users.id', '=', 'lembur.id_employee')->join('branches', 'branches.id', '=', 'lembur.id_branch')->whereNull('lembur.deleted_at')->whereBetween('lembur', [Carbon::parse($filter_date[0])->format('Y-m-d'), Carbon::parse($filter_date[1])->format('Y-m-d')])->where('id_employee', $employee_id)->paginate(10);
+            } else {
+                $lembur = DB::table('lembur')->select('lembur.*', 'lembur.tanggal as created_at', 'users.name as created_by', 'branches.name as branch')->join('users', 'users.id', '=', 'lembur.id_employee')->join('branches', 'branches.id', '=', 'lembur.id_branch')->whereNull('lembur.deleted_at')->paginate(10);
+            }
             return $this->respond($lembur);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
@@ -54,13 +62,13 @@ class ApprovalController extends AdminBaseController
     public function updateStatusLembur(Request $request)
     {
         try {
-            $lembur = DB::table('lembur')->where('id',$request->id)->update(['status'=>$request->status]);
+            $lembur = DB::table('lembur')->where('id', $request->id)->update(['status' => $request->status]);
             return $this->respond($lembur);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
         }
     }
-    
+
 
     public function approveApproval($id, Request $request)
     {

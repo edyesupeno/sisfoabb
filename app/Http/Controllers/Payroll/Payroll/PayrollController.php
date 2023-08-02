@@ -132,6 +132,7 @@ class PayrollController extends AdminBaseController
     public function payrollEmployeeDetail($id)
     {
         $payrollEmployee = $this->runPayrollService->getPayrollEmployeeDetail($id);
+        // dd($payrollEmployee->employee_detail->user_id);
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/detail', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
@@ -142,7 +143,10 @@ class PayrollController extends AdminBaseController
                 'total_deduction' => number_format($payrollEmployee->deduction_total, 2, ',', '.'),
                 'take_home_pay' => number_format($payrollEmployee->total_amount, 2, ',', '.'),
                 'earning_components' => $this->runPayrollService->getEarningEmployeeSlipComponents($id),
-                'deduction_components' => $this->runPayrollService->getDeductionEmployeeSlipComponents($payrollEmployee)
+                'deduction_components' => $this->runPayrollService->getDeductionEmployeeSlipComponents($payrollEmployee),
+                'start_date' => $payrollEmployee->payroll_slip->date,
+                'end_date' => $payrollEmployee->payroll_slip->end_date,
+                'user_id' => $payrollEmployee->employee_detail->user_id
             ]
         ]);
     }
