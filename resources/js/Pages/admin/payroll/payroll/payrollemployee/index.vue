@@ -190,6 +190,8 @@ onMounted(() => {
                 <!-- Filter -->
                 <VFilter @search="searchHandle" @apply="applyFilter" @clear="clearFilter" :additional="additional" />
                 <VButton label="Paid All" type="primary" class="mt-auto" @click="openModalForm = true"/>
+                <!-- <VButton label="Export" type="success" class="mt-auto"/> -->
+                <a :href="props.additional.export_url" class="btn bg-success hover:bg-success-hover text-white">Export</a>
             </div>
         </header>
 

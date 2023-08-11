@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Services\FileService;
 use Illuminate\Support\Facades\DB;
 use App\Actions\Options\GetBranchOptions;
+use App\Exports\PayrollSlipExport;
 use App\Helpers\Utility\Payroll\Calculate;
 use App\Helpers\Utility\Payroll\Component;
 use App\Http\Controllers\AdminBaseController;
@@ -22,6 +23,7 @@ use App\Http\Resources\Payroll\Payroll\PayrollEmployeeListResource;
 use App\Models\PayrollComponent;
 use App\Services\Employee\Employee\AttendanceLogService;
 use App\Services\Employee\Employee\EmployeeService;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PayrollController extends AdminBaseController
 {
@@ -112,7 +114,8 @@ class PayrollController extends AdminBaseController
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/index', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
-                'payroll_slip_id' => $id
+                'payroll_slip_id' => $id,
+                'export_url' => route('payroll.run.payrollexport', ['id' => $id])
             ]
         ]);
     }
@@ -132,7 +135,7 @@ class PayrollController extends AdminBaseController
     public function payrollEmployeeDetail($id)
     {
         $payrollEmployee = $this->runPayrollService->getPayrollEmployeeDetail($id);
-        // dd($payrollEmployee->employee_detail->user_id);
+        
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/detail', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
@@ -337,5 +340,9 @@ class PayrollController extends AdminBaseController
             DB::rollback();
             return $this->exceptionError($e->getMessage());
         }
+    }
+
+    public function payrollExport($id){
+        return Excel::download(new PayrollSlipExport($id), 'Slip_Gaji_' . $id . '.xlsx');
     }
 }

@@ -20,6 +20,7 @@ import VDataTable from '@/components/VDataTable/index.vue';
 import VEmpty from '@/components/src/icons/VEmpty.vue';
 import VLoading from '@/components/VLoading/index.vue';
 import VModalForm from './ModalForm.vue';
+import VModalTemplate from './ModalTemplate.vue'
 import VSelect from '@/components/VSelect/index.vue';
 
 const shiftLists = ref([])
@@ -35,6 +36,10 @@ const chooseSelectHandler = ref()
 const today = ref();
 const head = ref([])
 const headReport = ref([])
+
+const formImportExcel = ref();
+const fileImportExcel = ref(null)
+
 const breadcrumb = [
     {
         name: "Dashboard",
@@ -69,8 +74,10 @@ const updateAction = ref(false)
 const itemSelected = ref({})
 const openAlert = ref(false)
 const openModalForm = ref(false)
+const openModalTemplate = ref(false)
 const isLoading = ref(true)
 const isRecapLoading = ref(true)
+const isImportExcelLoading = ref(false)
 
 const props = defineProps({
     additional: object(),
@@ -195,6 +202,10 @@ const handleAddModalForm = () => {
     openModalForm.value = true
 }
 
+const handleAddModalTemplate = () => {
+    openModalTemplate.value = true
+}
+
 const handleChangeSchedule = (user_id, date, type) => {
     const data = {
         date: dayjs(today.value).get('year') + '-' + (dayjs(today.value).get('month') + 1) + '-' + date,
@@ -253,6 +264,14 @@ const closeModalForm = () => {
     openModalForm.value = false
 }
 
+const successDownload = () => {
+    openModalTemplate.value = false
+}
+
+const closeModalTemplate = () => {
+    openModalTemplate.value = false
+}
+
 
 const closeAlert = () => {
     itemSelected.value = ref({})
@@ -264,6 +283,54 @@ const filterBranch = () => {
     isLoading.value = true
     getData()
     getShiftOptions()
+}
+
+const handleImportExcel = () => {
+    formImportExcel.value.click();
+}
+
+const handleChangeImportExcel = (e) =>{
+    fileImportExcel.value = e.target.files[0];
+    isImportExcelLoading.value = true;
+
+    const formData = new FormData();
+    formData.append('import_excel', e.target.files[0]);
+      
+    axios.post(route('attendance.schedule.scheduleimport'), formData)
+        .then((res) => {
+            if (res.data.meta.success == false) {
+                notify({
+                    type: "error",
+                    group: "top",
+                    text: res.data.meta.message
+                }, 2500)
+            } else {
+                notify({
+                    type: "success",
+                    group: "top",
+                    text: res.data.meta.message
+                }, 2500)
+                // window.location.reload();
+                isLoading.value = true
+                getData()
+            }
+
+        }).catch((res) => {
+            // Handle validation errors
+            const result = res.response.data
+            if (result.hasOwnProperty('errors')) {
+                formError.value = ref({});
+                Object.keys(result.errors).map((key) => {
+                    formError.value[key] = result.errors[key].toString();
+                });
+            }
+
+            notify({
+                type: "error",
+                group: "top",
+                text: result.message
+            }, 2500)
+        }).finally(() => isImportExcelLoading.value = false)
 }
 
 
@@ -296,6 +363,10 @@ onMounted(() => {
                         <VFilter @search="searchHandle" @apply="applyFilter" @clear="clearFilter" :additional="additional"
                             :shiftList="shiftLists" />
                         <VButton label="Generate schedule" type="primary" @click="handleAddModalForm" class="mt-auto" />
+                        <!-- Import Excel -->
+                        <input type="file" ref="formImportExcel" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel" @change="handleChangeImportExcel" hidden>
+                        <VButton label="Import" type="success" @click="handleImportExcel" class="mt-auto" :isLoading="isImportExcelLoading"/>
+                        <VButton label="Template" type="success" @click="handleAddModalTemplate" class="mt-auto" />
                     </div>
                 </header>
                 <div v-if="isLoading">
@@ -370,6 +441,8 @@ onMounted(() => {
         </section>
     </div>
 
+    <VModalTemplate :open-dialog="openModalTemplate" @close="closeModalTemplate"
+        @successSubmit="successDownload" :additional="additional" :branch="filterBranchValue"/>
     <VModalForm :data="itemSelected" :update-action="updateAction" :open-dialog="openModalForm" @close="closeModalForm"
         @successSubmit="successSubmit" :additional="additional" :branch="filterBranchValue" :shiftList="shiftLists"/>
     <VAlert :open-dialog="openAlert" @closeAlert="closeAlert" type="danger" :headerLabel="alertData.headerLabel"

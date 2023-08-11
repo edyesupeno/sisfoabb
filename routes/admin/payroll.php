@@ -28,6 +28,7 @@ Route::prefix('payroll')->name('payroll.')->group(function () {
         Route::get('{id}/payroll-employee/edit', 'payrollEmployeeEdit')->name('payrollemployee.edit');
         Route::put('{id}/payroll-employee/update', 'payrollEmployeeUpdate')->name('payrollemployee.update');
         Route::delete('{id}/payroll-employee/delete', 'payrollEmployeeDelete')->name('payrollemployee.delete');
-
+        
+        Route::get('{id}/payroll-export', 'payrollExport')->name('payrollexport');
     });
 });

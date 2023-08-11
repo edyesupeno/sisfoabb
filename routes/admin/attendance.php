@@ -46,5 +46,8 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::post('{user_id}/update-schedule', 'updateSchedule')->name('update');
         // Route::put('{id}/update-data', 'editShift')->name('update');
         // Route::delete('{id}/delete-data', 'deleteShift')->name('delete');
+
+        Route::get('/schedule-export', 'exportTemplate')->name('scheduleexport');
+        Route::post('/schedule-import', 'importSchedule')->name('scheduleimport');
     });
 });
