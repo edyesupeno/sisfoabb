@@ -69,7 +69,16 @@ class ScheduleExport implements FromView, ShouldAutoSize, WithEvents, WithTitle
 
         $letters = [];
         for ($i = $startNumber; $i < $startNumber + $loopLength; $i++) {
-            $currentLetter = chr($i + ord('A') - 1);
+            $currentLetter = '';
+            $quotient = $i;
+            $base = ord('Z') - ord('A') + 1;
+
+            while ($quotient > 0) {
+                $remainder = ($quotient - 1) % $base;
+                $currentLetter = chr(ord('A') + $remainder) . $currentLetter;
+                $quotient = floor(($quotient - $remainder) / $base);
+            }
+
             $letters[] = $currentLetter;
         }
 
