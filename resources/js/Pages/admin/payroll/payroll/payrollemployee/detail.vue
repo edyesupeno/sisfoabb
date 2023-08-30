@@ -463,7 +463,7 @@ onMounted(() => {
                     <div class="px-2 space-y-2">
                         <div class="flex justify-between" v-for="(data, index) in additional.deduction_components" :key="index">
                             <div>
-                                {{ data.name }} 
+                                {{ data.name }}
                                 <span v-if="index != 0" class="font-bold">
                                     <span v-if="data.pay_type == 'fix'">x {{ data.total_cross }}</span>
                                     <span v-else-if="data.pay_type == 'attendance'">x {{ data.total_cross }} Hari</span>

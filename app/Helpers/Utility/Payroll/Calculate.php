@@ -283,7 +283,7 @@ class Calculate
     {
         if ($employee->is_use_bpjsk) {
             $bpjsk = BpjskSetting::find($employee->bpjsk_setting_id);
-            $employeePrecentage = env('BPJSK_EMPLOYEE_PRECENTAGE', 1);
+            $employeePrecentage = intval(env('BPJSK_EMPLOYEE_PRECENTAGE', 1));
 
             if ($employee->is_use_bpjsk_specific_amount) {
                 $bpjskAmount = round(($employeePrecentage * $employee->bpjsk_specific_amount) / 100, 2, PHP_ROUND_HALF_UP);

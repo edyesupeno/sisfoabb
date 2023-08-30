@@ -27,10 +27,14 @@ class ValidateBasicInfoRequest extends FormRequest
             $pictureRule = 'nullable|file|max:3072|mimes:jpg,jpeg,png';
             $phoneNumberRule = 'required|string|unique:employees,id,' . $this->id;
             $emailRule = 'required|email|unique:users,email,' . $this->user_id;
+            $password = '';
+            $role = '';
         }else{
             $pictureRule = 'required|file|max:3072|mimes:jpg,jpeg,png';
             $phoneNumberRule = 'required|string|unique:employees';
             $emailRule = 'required|email|unique:users';
+            $password = 'required|confirmed|min:6';
+            $role = 'required|exists:roles,id';
         }
 
         return [
@@ -39,9 +43,9 @@ class ValidateBasicInfoRequest extends FormRequest
             'email' => $emailRule,
             'phone_number' => $phoneNumberRule,
             'employee_external_id' => 'nullable|string',
-            'password' => 'required|confirmed|min:6',
+            'password' => $password,
             'designation_id' => 'required|exists:designations,id',
-            'role_id' => 'required|exists:roles,id',
+            'role_id' => $role,
             'address' => 'required|string',
             'user_device' => 'nullable|string'
         ];

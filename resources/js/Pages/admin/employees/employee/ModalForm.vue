@@ -480,16 +480,16 @@ const update = async () => {
                             </div>
                         </template>
                     </VInput>
-                    <VInput placeholder="Insert Password" label="Password" :required="true" v-model="form.password"
+                    <VInput placeholder="Insert Password" label="Password" :required="props.updateAction ? false : true" v-model="form.password"
                         :errorMessage="formError.password" @update:modelValue="formError.password = ''"
                         type="password" />
-                    <VInput placeholder="Confirm Password" label="Confirm Password" :required="true"
+                    <VInput placeholder="Confirm Password" label="Confirm Password" :required="props.updateAction ? false : true"
                         v-model="form.password_confirmation" :errorMessage="formError.password_confirmation"
                         @update:modelValue="formError.password_confirmation = ''" type="password" />
                     <VSelect placeholder="Choose Designation" :required="true" v-model="form.designation_id"
                         :options="additional.designation_list" label="Designation"
                         :errorMessage="formError.designation_id" @update:modelValue="formError.designation_id = ''" />
-                    <VSelect placeholder="Choose Role" :required="true" v-model="form.role_id"
+                    <VSelect placeholder="Choose Role" :required="props.updateAction ? false : true" v-model="form.role_id"
                         :options="additional.role_list" label="Role" :errorMessage="formError.role_id"
                         @update:modelValue="formError.role_id = ''" />
                     <VInput placeholder="Insert Address" label="Address" :required="true" v-model="form.address"
