@@ -135,7 +135,7 @@ class PayrollController extends AdminBaseController
     public function payrollEmployeeDetail($id)
     {
         $payrollEmployee = $this->runPayrollService->getPayrollEmployeeDetail($id);
-        
+
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/detail', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
@@ -210,7 +210,8 @@ class PayrollController extends AdminBaseController
 
         $earningComponents = [];
         foreach ($request->earningComponents as $i => $val) {
-            $payType = PayrollComponent::find($val['payroll_component_id'])->pay_type;
+            $payroll = PayrollComponent::find($val['payroll_component_id']);
+            $payType = isset($payroll->pay_type) ? $payroll->pay_type : 'fix';
             $totalCross = 1;
             switch ($payType) {
                 case "fix":
@@ -248,6 +249,9 @@ class PayrollController extends AdminBaseController
                         });
                     $totalCross = $lembur->sum();
                     break;
+                default:
+                    $totalCross = 1;
+                    break;
             }
             $val['total_cross'] = $totalCross;
             $earningComponents[] = $val;
@@ -256,7 +260,8 @@ class PayrollController extends AdminBaseController
         $deductionComponents = [];
         foreach ($request->deductionComponents as $i => $val) {
             if ($i > 0) {
-                $payType = PayrollComponent::find($val['payroll_component_id'])->pay_type;
+                $payroll = PayrollComponent::find($val['payroll_component_id']);
+                $payType = isset($payroll->pay_type) ? $payroll->pay_type : 'fix';
                 $totalCross = 1;
                 switch ($payType) {
                     case "fix":
@@ -293,6 +298,9 @@ class PayrollController extends AdminBaseController
                                 return (int)$hours;
                             });
                         $totalCross = $lembur->sum();
+                        break;
+                    default:
+                        $totalCross = 1;
                         break;
                 }
                 $val['total_cross'] = $totalCross;
@@ -342,7 +350,8 @@ class PayrollController extends AdminBaseController
         }
     }
 
-    public function payrollExport($id){
+    public function payrollExport($id)
+    {
         return Excel::download(new PayrollSlipExport($id), 'Slip_Gaji_' . $id . '.xlsx');
     }
 }
