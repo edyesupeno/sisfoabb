@@ -43,7 +43,9 @@ class CheckAttendanceClockedToday
         $schedule = Schedule::where('user_id', $user_id)->where('date', $input_date->format('Y-m-d'))->where('is_leave', 0)->first();
         $yesterday_schedule = Schedule::where('user_id', $user_id)->where('date', $yesterday)->where('is_leave', 0)->first();
         $holiday_schedule = Schedule::where('user_id', $user_id)->where('date', $input_date->format('Y-m-d'))->where('is_leave', 1)->first();
+
         $today_attendance = Attendance::where('date_clock', $input_date->format('Y-m-d'))->where('user_id', $user_id)->first();
+        $yesterday_attendance = Attendance::where('date_clock', $yesterday)->where('user_id', $user_id)->first();
 
         if (isset($schedule)) {
             $shift_time_start = Carbon::parse($schedule->shift_detail->start_time);
@@ -76,7 +78,8 @@ class CheckAttendanceClockedToday
         $holiday_clockin = isset($holiday_schedule);
         $today_already_clockout = isset($schedule) && (isset($today_attendance) ? $today_attendance->clock_out != null : false);
         $clockin_before_schedule = isset($schedule) && $input_date->format('H:i') < $clock_in_tolerance;
-        $clockout_before_clockin = isset($schedule) && !isset($today_attendance);
+        $clockout_before_clockin = isset($schedule) && (!isset($today_attendance) && !isset($yesterday_attendance));
+        // $clockout_before_clockin = isset($schedule) && !isset($today_attendance);
         $already_clockout_today = isset($schedule) && (isset($today_attendance) ? $today_attendance->clock_out != null : false);
 
         if ($request->type === 'normal') {
