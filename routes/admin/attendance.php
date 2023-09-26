@@ -1,9 +1,20 @@
 <?php
 
+use App\Actions\Utility\Attendance\CheckStatusAttendance;
+use App\Actions\Utility\GetFile;
+use App\Actions\Utility\Leave\GenerateLeavePeriod;
+use App\Helpers\Utility\Time;
+use App\Http\Controllers\Attendance\Attendance\AttendanceDailyController;
 use App\Http\Controllers\Attendance\Schedule\ScheduleController;
 use App\Http\Controllers\Attendance\Shift\ShiftController;
 use App\Http\Controllers\Attendance\Attendance\AttendanceOverviewController;
-
+use App\Models\Attendance;
+use App\Models\BreakTime;
+use App\Models\Employee;
+use App\Models\Leave;
+use App\Models\Schedule;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +42,20 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('get-data', 'getAttendanceList')->name('getdata');
         Route::get('get-attendance-recap', 'getAttendanceRecap')->name('getdatarecap');
         Route::get('get-attendance-overview', 'getAttendanceOverviewData')->name('getdataoverview');
+        Route::get('export-attendance-monthly', 'getAttendanceListExport')->name('exportAttendanceMonthly');
+        Route::get('export-attendance-monthly-template', 'exportAttendanceMonthlyTemplate')->name('exportAttendanceMonthlyTemplate');
+        Route::post('import-attendance-monthly', 'importAttendanceMonthly')->name('importAttendanceMonthly');
+    });
+
+    Route::controller(AttendanceDailyController::class)->prefix('attendance-daily')->name('attendance-daily.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('get-attendance-header', 'getAttendanceListDate')->name('getattendanceheader');
+        Route::get('get-data', 'getAttendanceList')->name('getdata');
+        Route::get('get-attendance-recap', 'getAttendanceRecap')->name('getdatarecap');
+        Route::get('get-attendance-overview', 'getAttendanceOverviewData')->name('getdataoverview');
+        Route::get('export-attendance-monthly', 'getAttendanceListExport')->name('exportAttendanceMonthly');
+        Route::get('export-attendance-monthly-template', 'exportAttendanceMonthlyTemplate')->name('exportAttendanceMonthlyTemplate');
+        Route::post('import-attendance-monthly', 'importAttendanceMonthly')->name('importAttendanceMonthly');
     });
 });
 

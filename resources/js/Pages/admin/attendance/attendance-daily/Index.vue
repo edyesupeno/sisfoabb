@@ -32,15 +32,11 @@ import { Link } from "@inertiajs/inertia-vue3";
 
 const itemSelected = ref({});
 const openModalForm = ref(false);
-const openModalTemplate = ref(false);
 const openModalExport = ref(false);
 const attendanceQuery = ref([]);
 const attendanceRecapQuery = ref([]);
 const attendanceListHeader = ref([]);
 const filterBranchValue = ref(1);
-
-const formImportExcel = ref();
-const fileImportExcel = ref(null);
 
 const breadcrumb = [
   {
@@ -51,25 +47,25 @@ const breadcrumb = [
   {
     name: "Attendance",
     active: false,
-    to: route("attendance.attendance-overview.index"),
+    to: route("attendance.attendance-daily.index"),
   },
   {
-    name: "Attendance",
+    name: "Daily",
     active: true,
-    to: route("attendance.attendance-overview.index"),
+    to: route("attendance.attendance-daily.index"),
   },
 ];
 const overviewLoading = ref(true);
 const attendanceListLoading = ref(true);
 const attendanceRecapLoading = ref(true);
-const isImportExcelLoading = ref(false);
 
 const filter = ref({
-  month: {
+  date: {
+    day: 1,
     month: dayjs().get("month"),
     year: dayjs().get("year"),
   },
-  currentMonth: dayjs().format("MMMM YYYY"),
+  currentDate: dayjs().format("dd MMMM YYYY"),
 });
 const attendanceOverview = ref([
   {
@@ -110,21 +106,22 @@ const props = defineProps({
 });
 
 const handleDate = () => {
-  if (filter.value.month) {
-    const date = new Date(filter.value.month.year, filter.value.month.month, 1);
-    const startDate = dayjs(date).format("YYYY-MM-DD");
-    filter.value.filtermonth = startDate;
-    filter.value.currentMonth = dayjs(date).format("MMMM YYYY");
+  if (filter.value.date) {
+    // const date = new Date(filter.value.date.year, filter.value.date.month);
+    // const startDate = dayjs(date).format("YYYY-MM-DD");
+    console.log(filter.value.date);
+    // filter.value.filterdate = startDate;
+    // filter.value.currentDate = dayjs(date).format("dd MMMM YYYY");
   }
 
-  initData();
+  // initData();
 };
 
 const getAttendanceOverviewData = debounce(async (page) => {
   axios
-    .get(route("attendance.attendance-overview.getdataoverview"), {
+    .get(route("attendance.attendance-daily.getdataoverview"), {
       params: {
-        filter_date: filter.value.filtermonth,
+        filter_date: filter.value.filterdate,
         filter_branch: filterBranchValue.value,
       },
     })
@@ -161,9 +158,9 @@ const getAttendanceOverviewData = debounce(async (page) => {
 
 const getAttendanceListData = debounce(async (page) => {
   axios
-    .get(route("attendance.attendance-overview.getdata"), {
+    .get(route("attendance.attendance-daily.getdata"), {
       params: {
-        filter_date: filter.value.filtermonth,
+        filter_date: filter.value.filterdate,
         filter_branch: filterBranchValue.value,
       },
     })
@@ -185,9 +182,9 @@ const getAttendanceListData = debounce(async (page) => {
 
 const getAttendanceRecapData = debounce(async (page) => {
   axios
-    .get(route("attendance.attendance-overview.getdatarecap"), {
+    .get(route("attendance.attendance-daily.getdatarecap"), {
       params: {
-        filter_date: filter.value.filtermonth,
+        filter_date: filter.value.filterdate,
         filter_branch: filterBranchValue.value,
       },
     })
@@ -210,9 +207,9 @@ const getAttendanceRecapData = debounce(async (page) => {
 
 const getAttendanceListHeader = debounce(async (page) => {
   axios
-    .get(route("attendance.attendance-overview.getattendanceheader"), {
+    .get(route("attendance.attendance-daily.getattendanceheader"), {
       params: {
-        filter_date: filter.value.filtermonth,
+        filter_date: filter.value.filterdate,
       },
     })
     .then((res) => {
@@ -261,81 +258,8 @@ const closeModalExport = () => {
   openModalExport.value = false;
 };
 
-const handleAddModalTemplate = () => {
-  openModalTemplate.value = true;
-};
-
-const successDownload = () => {
-  openModalTemplate.value = false;
-};
-
-const closeModalTemplate = () => {
-  openModalTemplate.value = false;
-};
-
-const handleImportExcel = () => {
-  formImportExcel.value.click();
-};
-
-const handleChangeImportExcel = (e) => {
-  fileImportExcel.value = e.target.files[0];
-  isImportExcelLoading.value = true;
-
-  const formData = new FormData();
-  formData.append("import_excel", e.target.files[0]);
-
-  axios
-    .post(
-      route("attendance.attendance-overview.importAttendanceMonthly"),
-      formData
-    )
-    .then((res) => {
-      if (res.data.meta.success == false) {
-        notify(
-          {
-            type: "error",
-            group: "top",
-            text: res.data.meta.message,
-          },
-          2500
-        );
-      } else {
-        notify(
-          {
-            type: "success",
-            group: "top",
-            text: res.data.meta.message,
-          },
-          2500
-        );
-        // window.location.reload();
-        initData();
-      }
-    })
-    .catch((res) => {
-      // Handle validation errors
-      const result = res.response.data;
-      if (result.hasOwnProperty("errors")) {
-        formError.value = ref({});
-        Object.keys(result.errors).map((key) => {
-          formError.value[key] = result.errors[key].toString();
-        });
-      }
-
-      notify(
-        {
-          type: "error",
-          group: "top",
-          text: result.message,
-        },
-        2500
-      );
-    })
-    .finally(() => (isImportExcelLoading.value = false));
-};
-
 onMounted(() => {
-  initData();
+  // initData();
 });
 </script>
 
@@ -343,29 +267,10 @@ onMounted(() => {
   <Head :title="title"></Head>
   <VBreadcrumb :routes="breadcrumb" />
   <div class="mb-4 sm:mb-6 flex justify-between">
-    <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Attendance</h1>
+    <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">
+      Attendance Daily
+    </h1>
     <div class="flex flex-1 items-center justify-end">
-      <!-- Import Excel -->
-      <input
-        type="file"
-        ref="formImportExcel"
-        accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-        @change="handleChangeImportExcel"
-        hidden
-      />
-      <VButton
-        label="Import"
-        type="success"
-        @click="handleImportExcel"
-        class="mt-auto"
-        :isLoading="isImportExcelLoading"
-      />
-      <VButton
-        label="Template"
-        type="success"
-        @click="handleAddModalTemplate"
-        class="mt-auto mr-2"
-      />
       <!-- Export -->
       <VButton
         label="Export"
@@ -381,45 +286,25 @@ onMounted(() => {
         :clearable="false"
         @update:modelValue="filterBranch"
       />
-      <Link :href="route('attendance.attendance-daily.index')" class="btn bg-white hover:bg-slate-200 text-blue-500">
-        <span class="mr-2">Daily</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          class="bi bi-box-arrow-up-right text-blue-500"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"
-          />
-          <path
-            fill-rule="evenodd"
-            d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"
-          />
-        </svg>
-      </Link>
     </div>
   </div>
 
   <!-- Attendance Overview -->
   <div class="bg-white shadow-lg rounded-md mb-8 p-4">
     <div class="mb-5 flex justify-between items-center">
-      <h1 class="text-xl text-slate-800 font-semibold">Attendance Overview</h1>
+      <h1 class="text-xl text-slate-800 font-semibold">Daily Overview</h1>
       <div class="inline-flex space-x-2">
         <!-- <VButton label="Export" type="outline-primary" class="my-auto" /> -->
         <Datepicker
-          v-model="filter.month"
+          v-model="filter.date"
           @update:modelValue="handleDate"
-          month-picker
+          date-picker
           :enableTimePicker="false"
           position="left"
           :clearable="false"
-          format="MMMM yyyy"
-          previewFormat="MMMM yyyy"
-          placeholder="Select Active Month"
+          format="dd MMMM yyyy"
+          previewFormat="dd MMMM yyyy"
+          placeholder="Select Date"
         />
       </div>
     </div>
@@ -469,49 +354,24 @@ onMounted(() => {
             <div class="text-slate-500 font-medium text-sm">
               {{ filter.currentMonth }}
             </div>
-            <div
-              class="inline-flex space-x-2 text-slate-500 font-normal text-sm"
-            >
-              <div class="inline-flex">
-                <VPresent class="my-auto mr-1" />
-                Present
-              </div>
-              <div class="inline-flex">
-                <VLate class="my-auto mr-1" />
-                Late
-              </div>
-              <div class="inline-flex">
-                <VAbsent class="my-auto mr-1" />
-                Absent
-              </div>
-              <div class="inline-flex">
-                <VClockoutEarly class="my-auto mr-1" />
-                Clockout Early
-              </div>
-              <div class="inline-flex">
-                <VLeave class="my-auto mr-1" />
-                Leave
-              </div>
-              <div class="inline-flex">
-                <VHoliday class="my-auto mr-1" />
-                Holiday
-              </div>
-              <div class="inline-flex">
-                <VUnassign class="my-auto mr-1" />
-                Unassign
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
     <!-- Table -->
-    <section class="py-6 px-4">
+    <section class="pb-6 px-4">
       <div v-if="attendanceListLoading">
         <VLoading />
       </div>
       <VDataTable
-        :heads="attendanceListHeader"
+        :heads="[
+          'Employee Name',
+          'Type',
+          'Schedule',
+          'Clock In',
+          'Clock Out',
+          'Date',
+        ]"
         v-if="!attendanceListLoading"
         wrapperClass="!px-0"
         :freezeTable="true"
@@ -529,100 +389,68 @@ onMounted(() => {
             </div>
           </td>
         </tr>
-        <tr v-for="(data, index) in attendanceQuery" :key="index" v-else>
-          <td class="px-4 whitespace-nowrap h-16 fixed-left">
+        <tr
+          v-for="(data, index) in attendanceQuery"
+          :key="index"
+          class="border-b-2"
+          v-else
+        >
+          <td class="px-4 whitespace-nowrap h-10 fixed-left">
             {{ data.employee_name }}
           </td>
-          <td
-            class="px-4 whitespace-nowrap h-16"
-            v-for="(attendanceData, attendanceIndex) in data.attendances"
-            :key="attendanceIndex"
-          >
-            <div v-if="attendanceData.status === 'netral'">-</div>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
             <div
-              v-else
-              class="p-1 border-2 rounded-lg border-slate-200"
-              :class="{
-                'cursor-pointer':
-                  attendanceData.status === 'present' ||
-                  attendanceData.status === 'late' ||
-                  attendanceData.status === 'clockout_early',
-              }"
+              class="py-[2px] px-4 bg-amber-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
             >
-              <VHoliday v-if="attendanceData.status === 'holiday'" />
-              <VPresent
-                v-else-if="attendanceData.status === 'present'"
-                @click="(openModalForm = true), (itemSelected = attendanceData)"
-              />
-              <VLate
-                v-else-if="attendanceData.status === 'late'"
-                @click="(openModalForm = true), (itemSelected = attendanceData)"
-              />
-              <VAbsent v-else-if="attendanceData.status === 'absent'" />
-              <VClockoutEarly
-                v-else-if="attendanceData.status === 'clockout_early'"
-                @click="(openModalForm = true), (itemSelected = attendanceData)"
-              />
-              <VLeave v-else-if="attendanceData.status === 'leave'" />
-              <VUnassign v-else-if="attendanceData.status === 'unassigned'" />
+              <VLate class="my-auto mr-2" />
+              <span class="text-amber-600">Late</span>
+            </div>
+            <div
+              class="py-[2px] px-4 bg-blue-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
+            >
+              <VPresent class="my-auto mr-2" />
+              <span class="text-blue-600">Present</span>
+            </div>
+            <div
+              class="py-[2px] px-4 bg-red-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
+            >
+              <VAbsent class="my-auto mr-2" />
+              <span class="text-red-600">Absent</span>
+            </div>
+            <div
+              class="py-[2px] px-4 bg-cyan-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
+            >
+              <VClockoutEarly class="my-auto mr-2" />
+              <span class="text-cyan-600">Clockout Early</span>
+            </div>
+            <div
+              class="py-[2px] px-4 bg-pink-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
+            >
+              <VLeave class="my-auto mr-2" />
+              <span class="text-pink-600">Leave</span>
+            </div>
+            <div
+              class="py-[2px] px-4 bg-yellow-100 text-white rounded-full inline-flex"
+              style="font-size: 12px"
+            >
+              <VHoliday class="my-auto mr-2" />
+              <span class="text-yellow-600">Holiday</span>
             </div>
           </td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">08:00 - 10:00</td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">08:00</td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">10:00</td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">10 August 2023</td>
         </tr>
       </VDataTable>
     </section>
   </div>
 
-  <!-- Attendance Recap -->
-  <div class="bg-white shadow-lg rounded-sm mb-8">
-    <div class="flex flex-col md:flex-row md:-mr-px">
-      <div class="grow">
-        <div class="py-6 px-4">
-          <div class="font-semibold text-xl text-slate-800">Recap</div>
-          <div class="text-slate-500 font-medium text-sm">
-            {{ filter.currentMonth }}
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Table -->
-    <section class="py-6 px-4">
-      <div v-if="attendanceRecapLoading">
-        <VLoading />
-      </div>
-      <VDataTable
-        :heads="attendanceListHeader"
-        v-if="!attendanceRecapLoading"
-        wrapperClass="!px-0"
-        :freezeTable="true"
-      >
-        <tr v-if="attendanceRecapQuery.length === 0 && !attendanceRecapLoading">
-          <td
-            class="overflow-hidden my-2"
-            :colspan="attendanceListHeader.length"
-          >
-            <div class="flex items-center flex-col w-full my-32">
-              <VEmpty />
-              <div class="mt-9 text-slate-500 text-xl md:text-xl font-medium">
-                Result not found.
-              </div>
-            </div>
-          </td>
-        </tr>
-        <tr v-for="(data, index) in attendanceRecapQuery" :key="index" v-else>
-          <td class="px-4 whitespace-nowrap h-16 fixed-left capitalize">
-            {{ data.status.replace(/_/g, " ") }}
-          </td>
-          <td
-            class="px-4 whitespace-nowrap h-16"
-            v-for="(recapData, recapIndex) in data.recaps"
-            :key="recapIndex"
-          >
-            {{ recapData.total_recap }}
-          </td>
-        </tr>
-      </VDataTable>
-    </section>
-  </div>
   <VModalExport
     :open-dialog="openModalExport"
     @close="closeModalExport"

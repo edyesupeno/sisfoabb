@@ -21,6 +21,7 @@ Route::prefix('project')->name('project.')->group(function () {
         Route::get('detail', 'detail')->name('detail');
         Route::get('get-data-area', 'getDataArea')->name('getDataArea');
         Route::get('get-data', 'getData')->name('getdata');
+        Route::get('get-all-data', 'getAllData')->name('getalldata');
         Route::get('get-data-employ', 'getDataEmploy')->name('getdataemploy');
     });
    

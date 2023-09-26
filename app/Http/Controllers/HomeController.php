@@ -10,4 +10,6 @@ class HomeController extends AdminBaseController
         $this->path = "dashboard/index";
         $this->data = ["total" => "0"];
     }
+
+    
 }

@@ -17,7 +17,7 @@ use Carbon\CarbonPeriod;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Resources\Attendances\Schedule\SubmitScheduleResource;
 
-class AttendanceOverviewController extends AdminBaseController
+class AttendanceDailyController extends AdminBaseController
 {
     public function __construct(GetBranchOptions $getBranchOptions, AttendanceOverviewService $attendanceOverviewService)
     {
@@ -25,7 +25,7 @@ class AttendanceOverviewController extends AdminBaseController
         $this->attendanceOverviewService = $attendanceOverviewService;
 
         $this->title = "ERP ABB | Attendance";
-        $this->path = "attendance/attendance/Index";
+        $this->path = "attendance/attendance-daily/Index";
         $this->data = [
             'branch_list' => $this->getBranchOptions->handle()
         ];
