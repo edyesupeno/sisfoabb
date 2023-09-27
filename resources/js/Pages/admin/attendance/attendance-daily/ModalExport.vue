@@ -18,28 +18,32 @@ const emit = defineEmits(["close", "successDownload"]);
 
 const isLoading = ref(false);
 const formError = ref({});
-const form = ref({});
+const form = ref({
+  date: new Date()
+});
 const branchSelectHandle = ref();
 
 const handleDateRange = () => {
-  const dateStart = new Date(
-    form.value.date[0].getFullYear(),
-    form.value.date[0].getMonth(),
-    form.value.date[0].getDate()
-  );
-  const dateEnd = new Date(
-    form.value.date[1].getFullYear(),
-    form.value.date[1].getMonth(),
-    form.value.date[1].getDate()
-  );
+  // const dateStart = new Date(
+  //   form.value.date[0].getFullYear(),
+  //   form.value.date[0].getMonth(),
+  //   form.value.date[0].getDate()
+  // );
+  // const dateEnd = new Date(
+  //   form.value.date[1].getFullYear(),
+  //   form.value.date[1].getMonth(),
+  //   form.value.date[1].getDate()
+  // );
 
-  form.value.start_date = dayjs(dateStart).format("YYYY-MM-DD");
-  form.value.end_date = dayjs(dateEnd).format("YYYY-MM-DD");
+  // form.value.start_date = dayjs(dateStart).format("YYYY-MM-DD");
+  // form.value.end_date = dayjs(dateEnd).format("YYYY-MM-DD");
+  form.value.filterdate = dayjs(form.value.date).format("YYYY-MM-DD");
 };
 
 const openForm = () => {
   form.value = ref({});
   form.value.branch_id = props.branch;
+  form.value.date = new Date();
 };
 
 const closeForm = () => {
@@ -56,9 +60,15 @@ const submit = async () => {
 const downloadExcel = async () => {
   isLoading.value = true;
   axios
-    .get(route('attendance.attendance-overview.exportAttendanceMonthly', { 'branch_id': form.value.branch_id, 'start_date': form.value.start_date, 'end_date': form.value.end_date }), {
-      responseType: "blob",
-    })
+    .get(
+      route("attendance.attendance-daily.exportAttendanceDaily", {
+        branch_id: form.value.branch_id,
+        filter_date: form.value.filterdate
+      }),
+      {
+        responseType: "blob",
+      }
+    )
     .then((res) => {
       const contentDisposition = res.headers["content-disposition"];
       const fileName = contentDisposition
@@ -113,7 +123,7 @@ const downloadExcel = async () => {
 <template>
   <VDialog
     :showModal="openDialog"
-    title="Download Template"
+    title="Export Attendance Daily"
     @opened="openForm"
     @closed="closeForm"
     size="xl"
@@ -147,19 +157,17 @@ const downloadExcel = async () => {
         </div>
         <div class="col-span-2">
           <label class="block text-sm font-medium text-slate-600 mb-1">
-            Date Range <span class="text-rose-500">*</span>
+            Date <span class="text-rose-500">*</span>
           </label>
           <Datepicker
             v-model="form.date"
             @update:modelValue="handleDateRange"
-            range
-            :partial-range="false"
             :enableTimePicker="false"
             position="left"
             :clearable="false"
             format="dd MMMM yyyy"
             previewFormat="dd MMMM yyyy"
-            placeholder="Select Date Range"
+            placeholder="Select Date"
             :class="{ date_error: formError.date }"
           />
           <div

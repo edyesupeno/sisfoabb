@@ -53,12 +53,73 @@ const submit = async () => {
   downloadExcel();
 };
 
+// const downloadExcel = async () => {
+//   isLoading.value = true;
+//   axios
+//     .get(route('attendance.attendance-overview.exportAttendanceMonthlyTemplate', { 'branch_id': form.value.branch_id, 'start_date': form.value.start_date, 'end_date': form.value.end_date }), {
+//       responseType: "blob",
+//     })
+//     .then((res) => {
+//       const contentDisposition = res.headers["content-disposition"];
+//       const fileName = contentDisposition
+//         ? contentDisposition.split("filename=")[1].trim()
+//         : "download.xlsx";
+
+//       const url = window.URL.createObjectURL(new Blob([res.data]));
+//       const link = document.createElement("a");
+//       link.href = url;
+//       link.setAttribute("download", fileName);
+//       document.body.appendChild(link);
+//       link.click();
+//       document.body.removeChild(link);
+
+//       emit("close");
+//       emit("successDownload");
+//       form.value = ref({});
+//       notify(
+//         {
+//           type: "success",
+//           group: "top",
+//           text: "Download Sukses",
+//         },
+//         2500
+//       );
+//     })
+//     .catch((res) => {
+//       // Handle validation errors
+//       const result = res.response.data;
+//       if (result.hasOwnProperty("errors")) {
+//         formError.value = ref({});
+//         Object.keys(result.errors).map((key) => {
+//           formError.value[key] = result.errors[key].toString();
+//         });
+//       }
+
+//       notify(
+//         {
+//           type: "error",
+//           group: "top",
+//           text: result.message,
+//         },
+//         2500
+//       );
+//     })
+//     .finally(() => (isLoading.value = false));
+// };
+
 const downloadExcel = async () => {
   isLoading.value = true;
   axios
-    .get(route('attendance.attendance-overview.exportAttendanceMonthlyTemplate', { 'branch_id': form.value.branch_id, 'start_date': form.value.start_date, 'end_date': form.value.end_date }), {
-      responseType: "blob",
-    })
+    .get(
+      route("attendance.schedule.scheduleexport", {
+        branch_id: form.value.branch_id,
+        start_date: form.value.start_date,
+        end_date: form.value.end_date,
+      }),
+      {
+        responseType: "blob",
+      }
+    )
     .then((res) => {
       const contentDisposition = res.headers["content-disposition"];
       const fileName = contentDisposition

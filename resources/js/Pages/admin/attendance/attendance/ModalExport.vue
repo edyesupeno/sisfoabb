@@ -113,7 +113,7 @@ const downloadExcel = async () => {
 <template>
   <VDialog
     :showModal="openDialog"
-    title="Download Template"
+    title="Export Attendance Monthly"
     @opened="openForm"
     @closed="closeForm"
     size="xl"

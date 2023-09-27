@@ -117,6 +117,7 @@ const handleDate = () => {
     filter.value.currentMonth = dayjs(date).format("MMMM YYYY");
   }
 
+  console.log(filter.value);
   initData();
 };
 
@@ -336,6 +337,7 @@ const handleChangeImportExcel = (e) => {
 
 onMounted(() => {
   initData();
+  console.log(filter.value);
 });
 </script>
 
@@ -381,7 +383,10 @@ onMounted(() => {
         :clearable="false"
         @update:modelValue="filterBranch"
       />
-      <Link :href="route('attendance.attendance-daily.index')" class="btn bg-white hover:bg-slate-200 text-blue-500">
+      <Link
+        :href="route('attendance.attendance-daily.index')"
+        class="btn bg-white hover:bg-slate-200 text-blue-500"
+      >
         <span class="mr-2">Daily</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"

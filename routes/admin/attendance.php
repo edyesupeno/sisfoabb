@@ -1,5 +1,6 @@
 <?php
 
+use App\Actions\Utility\Attendance\CalculateAttendanceStatus;
 use App\Actions\Utility\Attendance\CheckStatusAttendance;
 use App\Actions\Utility\GetFile;
 use App\Actions\Utility\Leave\GenerateLeavePeriod;
@@ -53,9 +54,10 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('get-data', 'getAttendanceList')->name('getdata');
         Route::get('get-attendance-recap', 'getAttendanceRecap')->name('getdatarecap');
         Route::get('get-attendance-overview', 'getAttendanceOverviewData')->name('getdataoverview');
-        Route::get('export-attendance-monthly', 'getAttendanceListExport')->name('exportAttendanceMonthly');
-        Route::get('export-attendance-monthly-template', 'exportAttendanceMonthlyTemplate')->name('exportAttendanceMonthlyTemplate');
-        Route::post('import-attendance-monthly', 'importAttendanceMonthly')->name('importAttendanceMonthly');
+        Route::get('export-attendance-daily', 'getAttendanceListExport')->name('exportAttendanceDaily');
+        Route::get('testing', function () {
+            return view('export-daily-attendances');
+        });
     });
 });
 

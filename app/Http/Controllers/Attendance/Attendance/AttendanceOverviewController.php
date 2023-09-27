@@ -93,6 +93,39 @@ class AttendanceOverviewController extends AdminBaseController
         return Excel::download(new AttendanceMonthlyTemplateExport($request), 'attendances-monthly-template.xlsx');
     }
 
+    // public function importAttendanceMonthly(Request $request)
+    // {
+    //     try {
+    //         $data = Excel::toArray(new AttendanceMonthlyImport, $request->file('import_excel'));
+    //         for ($i = 3; $i < count($data[0]); $i++) {
+    //             $employee_id = explode(' - ', $data[0][$i][0])[0];
+
+    //             foreach ($data[0][$i] as $key => $item) {
+    //                 if ($key > 0) {
+    //                     $attendance_type = $item == 'SELECT ATTENDANCE' ? null : $item;
+    //                     $attendance_date = Carbon::createFromFormat('d/m/Y', $data[0][2][$key])->format('Y-m-d');
+
+    //                     if ($attendance_type != null && $attendance_type == 'Present') {
+    //                         $schedule = Schedule::where('user_id', $employee_id)->where('date', $attendance_date)->first();
+
+    //                         Attendance::create([
+    //                             'user_id' => $employee_id,
+    //                             'status' => 'wfo',
+    //                             'clock_in' => $schedule != null ? $schedule->shift_detail->start_time : '00:00:00',
+    //                             'clock_out' => $schedule != null ? $schedule->shift_detail->end_time : '00:00:00',
+    //                             'date_clock' => $attendance_date
+    //                         ]);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //         $result = new SubmitScheduleResource(true, 'Success import attendances');
+    //         return $this->respond($result);
+    //     } catch (\Exception $e) {
+    //         return $this->exceptionError($e->getMessage());
+    //     }
+    // }
+    
     public function importAttendanceMonthly(Request $request)
     {
         try {
@@ -102,18 +135,18 @@ class AttendanceOverviewController extends AdminBaseController
 
                 foreach ($data[0][$i] as $key => $item) {
                     if ($key > 0) {
-                        $attendance_type = $item == 'SELECT ATTENDANCE' ? null : $item;
-                        $attendance_date = Carbon::createFromFormat('d/m/Y', $data[0][2][$key])->format('Y-m-d');
-
-                        if ($attendance_type != null && $attendance_type == 'Present') {
-                            $schedule = Schedule::where('user_id', $employee_id)->where('date', $attendance_date)->first();
+                        $shift_id = $item == 'SELECT SHIFT' ? null : $item;
+                        $shift_date = Carbon::createFromFormat('d/m/Y', $data[0][2][$key])->format('Y-m-d');
+                        
+                        if ($shift_id != null && strtolower($shift_id) != 'libur') {
+                            $schedule = Schedule::where('shift_id', $shift_id)->first();
 
                             Attendance::create([
                                 'user_id' => $employee_id,
                                 'status' => 'wfo',
                                 'clock_in' => $schedule != null ? $schedule->shift_detail->start_time : '00:00:00',
                                 'clock_out' => $schedule != null ? $schedule->shift_detail->end_time : '00:00:00',
-                                'date_clock' => $attendance_date
+                                'date_clock' => $shift_date
                             ]);
                         }
                     }

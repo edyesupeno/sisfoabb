@@ -26,7 +26,6 @@ import VHoliday from "@/components/src/icons/solid/VHoliday.vue";
 import VUnassign from "@/components/src/icons/solid/VUnassign.vue";
 import VModalForm from "./ModalForm.vue";
 import VModalExport from "./ModalExport.vue";
-import VModalTemplate from "./ModalTemplate.vue";
 import VButton from "@/components/VButton/index.vue";
 import { Link } from "@inertiajs/inertia-vue3";
 
@@ -57,16 +56,18 @@ const breadcrumb = [
 ];
 const overviewLoading = ref(true);
 const attendanceListLoading = ref(true);
-const attendanceRecapLoading = ref(true);
 
+// const filter = ref({
+//   date: {
+//     month: dayjs().get("month"),
+//     year: dayjs().get("year"),
+//   },
+//   currentDate: dayjs().format("dd MMMM YYYY"),
+// });
 const filter = ref({
-  date: {
-    day: 1,
-    month: dayjs().get("month"),
-    year: dayjs().get("year"),
-  },
-  currentDate: dayjs().format("dd MMMM YYYY"),
+  date: new Date()
 });
+
 const attendanceOverview = ref([
   {
     label: "Present",
@@ -107,14 +108,11 @@ const props = defineProps({
 
 const handleDate = () => {
   if (filter.value.date) {
-    // const date = new Date(filter.value.date.year, filter.value.date.month);
-    // const startDate = dayjs(date).format("YYYY-MM-DD");
-    console.log(filter.value.date);
-    // filter.value.filterdate = startDate;
-    // filter.value.currentDate = dayjs(date).format("dd MMMM YYYY");
+    filter.value.filterdate = dayjs(filter.value.date).format("YYYY-MM-DD");
+    console.log(filter.value);
   }
 
-  // initData();
+  initData();
 };
 
 const getAttendanceOverviewData = debounce(async (page) => {
@@ -126,7 +124,6 @@ const getAttendanceOverviewData = debounce(async (page) => {
       },
     })
     .then((res) => {
-      console.log(filterBranchValue.value);
       let present = attendanceOverview.value.find((e) => e.type === "present");
       let absent = attendanceOverview.value.find((e) => e.type === "absent");
       let late = attendanceOverview.value.find((e) => e.type === "late");
@@ -180,54 +177,6 @@ const getAttendanceListData = debounce(async (page) => {
     .finally(() => (attendanceListLoading.value = false));
 }, 500);
 
-const getAttendanceRecapData = debounce(async (page) => {
-  axios
-    .get(route("attendance.attendance-daily.getdatarecap"), {
-      params: {
-        filter_date: filter.value.filterdate,
-        filter_branch: filterBranchValue.value,
-      },
-    })
-    .then((res) => {
-      console.log(res.data);
-      attendanceRecapQuery.value = res.data;
-    })
-    .catch((res) => {
-      notify(
-        {
-          type: "error",
-          group: "top",
-          text: res.response.data.message,
-        },
-        2500
-      );
-    })
-    .finally(() => (attendanceRecapLoading.value = false));
-}, 500);
-
-const getAttendanceListHeader = debounce(async (page) => {
-  axios
-    .get(route("attendance.attendance-daily.getattendanceheader"), {
-      params: {
-        filter_date: filter.value.filterdate,
-      },
-    })
-    .then((res) => {
-      attendanceListHeader.value = res.data;
-      getAttendanceListData();
-    })
-    .catch((res) => {
-      notify(
-        {
-          type: "error",
-          group: "top",
-          text: res.response.data.message,
-        },
-        2500
-      );
-    });
-}, 500);
-
 const filterBranch = () => {
   initData();
 };
@@ -235,10 +184,8 @@ const filterBranch = () => {
 const initData = () => {
   overviewLoading.value = true;
   attendanceListLoading.value = true;
-  attendanceRecapLoading.value = true;
   getAttendanceOverviewData();
-  getAttendanceListHeader();
-  getAttendanceRecapData();
+  getAttendanceListData();
 };
 
 const closeModalForm = () => {
@@ -259,7 +206,8 @@ const closeModalExport = () => {
 };
 
 onMounted(() => {
-  // initData();
+  filterBranchValue.value = props.additional.branch_id;
+  initData();
 });
 </script>
 
@@ -298,7 +246,6 @@ onMounted(() => {
         <Datepicker
           v-model="filter.date"
           @update:modelValue="handleDate"
-          date-picker
           :enableTimePicker="false"
           position="left"
           :clearable="false"
@@ -402,6 +349,7 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-amber-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-if="data.attendances.status == 'late'"
             >
               <VLate class="my-auto mr-2" />
               <span class="text-amber-600">Late</span>
@@ -409,6 +357,7 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-blue-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-else-if="data.attendances.status == 'present'"
             >
               <VPresent class="my-auto mr-2" />
               <span class="text-blue-600">Present</span>
@@ -416,6 +365,7 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-red-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-else-if="data.attendances.status == 'absent'"
             >
               <VAbsent class="my-auto mr-2" />
               <span class="text-red-600">Absent</span>
@@ -423,6 +373,7 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-cyan-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-else-if="data.attendances.status == 'checkout_early'"
             >
               <VClockoutEarly class="my-auto mr-2" />
               <span class="text-cyan-600">Clockout Early</span>
@@ -430,6 +381,7 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-pink-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-else-if="data.attendances.status == 'leave'"
             >
               <VLeave class="my-auto mr-2" />
               <span class="text-pink-600">Leave</span>
@@ -437,15 +389,60 @@ onMounted(() => {
             <div
               class="py-[2px] px-4 bg-yellow-100 text-white rounded-full inline-flex"
               style="font-size: 12px"
+              v-else-if="data.attendances.status == 'holiday'"
             >
               <VHoliday class="my-auto mr-2" />
               <span class="text-yellow-600">Holiday</span>
             </div>
+            <div
+              class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
+              style="font-size: 12px"
+              v-else
+            ></div>
           </td>
-          <td class="px-4 whitespace-nowrap h-10 text-right">08:00 - 10:00</td>
-          <td class="px-4 whitespace-nowrap h-10 text-right">08:00</td>
-          <td class="px-4 whitespace-nowrap h-10 text-right">10:00</td>
-          <td class="px-4 whitespace-nowrap h-10 text-right">10 August 2023</td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
+            <span
+              v-if="
+                data.schedules != null && data.schedules.shift_detail != null
+              ">
+              {{ data.schedules.shift_detail.start_time }} -
+              {{ data.schedules.shift_detail.end_time }}
+              </span>
+            <div
+              class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
+              style="font-size: 12px"
+              v-else
+            ></div>
+          </td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
+            <span
+              v-if="
+                data.attendances.clock_in != null && data.attendances.clock_in != '-'
+              ">
+              {{ data.attendances.clock_in }}
+              </span>
+            <div
+              class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
+              style="font-size: 12px"
+              v-else
+            ></div>
+          </td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
+            <span
+              v-if="
+                data.attendances.clock_out != null && data.attendances.clock_out != '-'
+              ">
+              {{ data.attendances.clock_out }}
+              </span>
+            <div
+              class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
+              style="font-size: 12px"
+              v-else
+            ></div>
+          </td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
+            <span>{{ dayjs(data.date).format("DD MMMM YYYY")}}</span>
+          </td>
         </tr>
       </VDataTable>
     </section>
@@ -455,13 +452,6 @@ onMounted(() => {
     :open-dialog="openModalExport"
     @close="closeModalExport"
     @successSubmit="successExport"
-    :additional="additional"
-    :branch="filterBranchValue"
-  />
-  <VModalTemplate
-    :open-dialog="openModalTemplate"
-    @close="closeModalTemplate"
-    @successSubmit="successDownload"
     :additional="additional"
     :branch="filterBranchValue"
   />
