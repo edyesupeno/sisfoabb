@@ -56,12 +56,12 @@ class ProjectController extends AdminBaseController
                 $request->filter_branch = $itemProject->id;
                 // $req->filter_date = '2023-06-01';
 
-                $data = $this->attendanceOverviewService->getAttendanceList($request);
+                $data = $this->attendanceOverviewService->getAttendanceListTodayDashboard($request);
 
                 $dataFilter = [];
                 foreach ($data as $item) {
-                    if (in_array($item['attendances'][date('d')]['status'], ['late', 'absent'])) {
-                        $item['attendances'] = $item['attendances'][date('d')]['status'];
+                    if (in_array($item['attendances'][date('j')]['status'], ['late', 'absent'])) {
+                        $item['attendances'] = $item['attendances'][date('j')]['status'];
                         array_push($dataFilter, $item);
                     }
                 }

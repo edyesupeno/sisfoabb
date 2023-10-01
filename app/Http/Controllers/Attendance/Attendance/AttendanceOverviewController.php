@@ -8,6 +8,7 @@ use App\Actions\Options\GetBranchOptions;
 use App\Exports\AttendanceMonthlyExport;
 use App\Exports\AttendanceMonthlyTemplateExport;
 use App\Http\Controllers\AdminBaseController;
+use App\Http\Resources\Attendances\Attendance\AttendanceListResource;
 use App\Services\Attendance\Attendance\AttendanceOverviewService;
 use App\Http\Resources\Attendances\Attendance\AttendanceOverviewResource;
 use App\Imports\AttendanceMonthlyImport;
@@ -66,7 +67,8 @@ class AttendanceOverviewController extends AdminBaseController
     {
         try {
             $data = $this->attendanceOverviewService->getAttendanceList($request);
-            return $this->respond($data);
+            return $this->respond(new AttendanceListResource($data, 'Success Get Attendance List'));
+            // return $this->respond($data);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
         }
@@ -125,7 +127,7 @@ class AttendanceOverviewController extends AdminBaseController
     //         return $this->exceptionError($e->getMessage());
     //     }
     // }
-    
+
     public function importAttendanceMonthly(Request $request)
     {
         try {
@@ -137,7 +139,7 @@ class AttendanceOverviewController extends AdminBaseController
                     if ($key > 0) {
                         $shift_id = $item == 'SELECT SHIFT' ? null : $item;
                         $shift_date = Carbon::createFromFormat('d/m/Y', $data[0][2][$key])->format('Y-m-d');
-                        
+
                         if ($shift_id != null && strtolower($shift_id) != 'libur') {
                             $schedule = Schedule::where('shift_id', $shift_id)->first();
 
@@ -148,6 +150,24 @@ class AttendanceOverviewController extends AdminBaseController
                                 'clock_out' => $schedule != null ? $schedule->shift_detail->end_time : '00:00:00',
                                 'date_clock' => $shift_date
                             ]);
+                        }
+
+                        if ($shift_id != null) {
+                            $schedule = Schedule::where('user_id', $employee_id)->where('date', $shift_date)->first();
+                            $input = [
+                                'user_id' => $employee_id,
+                                'shift_id' => strtolower($shift_id) == 'libur' ? null : explode(' - ', $shift_id)[0],
+                                'is_leave' => strtolower($shift_id) == 'libur' ? 1 : 0,
+                                'date' => $shift_date,
+                            ];
+        
+                            $attendance = Attendance::where('date_clock', $shift_date)->where('user_id', $employee_id)->first();
+        
+                            if (isset($schedule) && !isset($attendance)) {
+                                $schedule->update($input);
+                            } elseif (!isset($attendance)) {
+                                Schedule::create($input);
+                            }
                         }
                     }
                 }

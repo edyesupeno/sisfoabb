@@ -425,7 +425,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
             <tr class="bg-white border-b">
               <th class="px-6 py-3 flex justify-between items-center w-full">
                 <span>Attendance {{ data.name }}</span>
-                <Link :href="route('attendance.attendance-overview.index')">
+                <Link :href="route('attendance.attendance-daily.index', {'branch_id': data.id })">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="16"

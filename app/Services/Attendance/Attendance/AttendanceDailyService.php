@@ -121,7 +121,8 @@ class AttendanceDailyService
         }
 
         // Query requirement data
-        $employees = Employee::where('branch_id', $filter_branch)->get();
+        // $employees = Employee::where('branch_id', $filter_branch)->get();
+        $employees = Employee::where('branch_id', $filter_branch)->paginate(10);
         $attendances = Attendance::with(['user_detail'])->whereMonth('date_clock', $month)->whereYear('date_clock', $year)->whereIn('user_id', $employees->pluck('user_id'))->get();
         $schedules =  Schedule::with(['shift_detail'])->whereMonth('date', $month)->whereYear('date', $year)->whereIn('user_id', $employees->pluck('user_id'))->get();
         $leaves = Leave::where(function ($query) use ($month) {
@@ -189,15 +190,15 @@ class AttendanceDailyService
                 }
             }
 
-            $data['attendances'] = $data['attendances'][Carbon::parse($filter_date)->format('d')];
+            $data['attendances'] = $data['attendances'][Carbon::parse($filter_date)->format('j')];
             $data['schedules'] = collect($schedules)->where('user_id', $employee->user_id)->where('date', Carbon::parse($filter_date)->format('Y-m-d'))->first();
 
             array_push($attendance_list, $data);
         }
 
+        $employees['attendances'] = $attendance_list;
 
-
-        return $attendance_list;
+        return $employees;
     }
 
     public function getAttendanceListExport($request)

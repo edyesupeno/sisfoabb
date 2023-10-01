@@ -9,6 +9,7 @@ use App\Exports\AttendanceDailyExport;
 use App\Exports\AttendanceMonthlyExport;
 use App\Exports\AttendanceMonthlyTemplateExport;
 use App\Http\Controllers\AdminBaseController;
+use App\Http\Resources\Attendances\Attendance\AttendanceListResource;
 use App\Services\Attendance\Attendance\AttendanceOverviewService;
 use App\Http\Resources\Attendances\Attendance\AttendanceOverviewResource;
 use App\Imports\AttendanceMonthlyImport;
@@ -50,7 +51,8 @@ class AttendanceDailyController extends AdminBaseController
     {
         try {
             $data = $this->attendanceDailyService->getAttendanceList($request);
-            return $this->respond($data);
+            return $this->respond(new AttendanceListResource($data, 'Success Get Attendance List'));
+            // return $this->respond($data);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
         }

@@ -15,6 +15,7 @@ import AppLayout from "@/layouts/apps.vue";
 import VBreadcrumb from "@/components/VBreadcrumb/index.vue";
 import VLoading from "@/components/VLoading/index.vue";
 import VDataTable from "@/components/VDataTable/index.vue";
+import VPagination from '@/components/VPagination/index.vue'
 import VSelect from "@/components/VSelect/index.vue";
 import VPresent from "@/components/src/icons/solid/VPresent.vue";
 import VLate from "@/components/src/icons/solid/VLate.vue";
@@ -153,16 +154,39 @@ const getAttendanceOverviewData = debounce(async (page) => {
     .finally(() => (overviewLoading.value = false));
 }, 500);
 
+
+const pagination = ref({
+    count: '',
+    current_page: 1,
+    per_page: '',
+    total: 0,
+    total_pages: 1
+})
+
+const nextPaginate = () => {
+    pagination.value.current_page += 1
+    attendanceListLoading.value = true
+    getAttendanceListData(pagination.value.current_page)
+}
+
+const previousPaginate = () => {
+    pagination.value.current_page -= 1
+    attendanceListLoading.value = true
+    getAttendanceListData(pagination.value.current_page)
+}
+
 const getAttendanceListData = debounce(async (page) => {
   axios
     .get(route("attendance.attendance-daily.getdata"), {
       params: {
+        page: page,
         filter_date: filter.value.filterdate,
         filter_branch: filterBranchValue.value,
       },
     })
     .then((res) => {
-      attendanceQuery.value = res.data;
+      attendanceQuery.value = res.data.data;
+      pagination.value = res.data.meta.pagination
     })
     .catch((res) => {
       notify(
@@ -185,7 +209,7 @@ const initData = () => {
   overviewLoading.value = true;
   attendanceListLoading.value = true;
   getAttendanceOverviewData();
-  getAttendanceListData();
+  getAttendanceListData(1);
 };
 
 const closeModalForm = () => {
@@ -445,6 +469,9 @@ onMounted(() => {
           </td>
         </tr>
       </VDataTable>
+      <div class="py-6">
+          <VPagination :pagination="pagination" @next="nextPaginate" @previous="previousPaginate" />
+      </div>
     </section>
   </div>
 
