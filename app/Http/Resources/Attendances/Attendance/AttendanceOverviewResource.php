@@ -24,14 +24,29 @@ class AttendanceOverviewResource extends JsonResource
      */
     public function toArray($request)
     {
+        // return [
+        //     'data' => [
+        //         'total_present' => $this['total_present'],
+        //         'total_absent' => $this['total_absent'],
+        //         'total_late' => $this['total_late'],
+        //         'total_clockout_early' => $this['total_clockout_early'],
+        //         'total_leaves' => $this['total_leaves'],
+        //         'total_holiday' => $this['total_holiday'],
+        //     ],
+        //     'meta' => [
+        //         'success' => true,
+        //         'message' => $this->message,
+        //         'pagination' => (object)[],
+        //     ],
+        // ];
         return [
             'data' => [
-                'total_present' => $this['total_present'],
-                'total_absent' => $this['total_absent'],
-                'total_late' => $this['total_late'],
-                'total_clockout_early' => $this['total_clockout_early'],
-                'total_leaves' => $this['total_leaves'],
-                'total_holiday' => $this['total_holiday'],
+                'total_present' => $this['present'],
+                'total_absent' => $this['absent'],
+                'total_late' => $this['late'],
+                'total_clockout_early' => $this['clockout_early'],
+                'total_leaves' => $this['leave'],
+                'total_holiday' => $this['holiday'],
             ],
             'meta' => [
                 'success' => true,

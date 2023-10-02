@@ -55,8 +55,20 @@ class AttendanceOverviewController extends AdminBaseController
     public function getAttendanceOverviewData(Request $request)
     {
         try {
-            $data = $this->attendanceOverviewService->getAttendanceOverview($request);
-            $result = new AttendanceOverviewResource($data, 'Success Get Attendance Overview');
+            // $data = $this->attendanceOverviewService->getAttendanceOverview($request);
+            // $result = new AttendanceOverviewResource($data, 'Success Get Attendance Overview');
+            // return $this->respond($result);
+            $response_data = [];
+            $data = $this->attendanceOverviewService->getAttendanceRecap($request);
+            foreach($data as $item){
+                $totals = 0;
+                foreach($item['recaps'] as $itemRecap){
+                    $totals += $itemRecap['total_recap'];
+                }
+                $response_data[$item['status']] = $totals;
+            }
+
+            $result = new AttendanceOverviewResource($response_data, 'Success Get Attendance Overview');
             return $this->respond($result);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());

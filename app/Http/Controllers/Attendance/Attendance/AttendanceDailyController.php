@@ -39,8 +39,25 @@ class AttendanceDailyController extends AdminBaseController
     public function getAttendanceOverviewData(Request $request)
     {
         try {
-            $data = $this->attendanceDailyService->getAttendanceOverview($request);
-            $result = new AttendanceOverviewResource($data, 'Success Get Attendance Overview');
+            // $data = $this->attendanceDailyService->getAttendanceOverview($request);
+            // $result = new AttendanceOverviewResource($data, 'Success Get Attendance Overview');
+            // return $this->respond($result);
+            $filter_date = $request->filter_date ?: Carbon::now();
+
+            $response_data = [];
+            $data = $this->attendanceDailyService->getAttendanceRecap($request);
+            foreach($data as $item){
+                $totals = 0;
+                foreach($item['recaps'] as $tgl => $itemRecap){
+                    if(Carbon::parse($filter_date)->format('j') == $tgl){
+                        $totals = $itemRecap['total_recap'];
+                        break;
+                    }
+                }
+                $response_data[$item['status']] = $totals;
+            }
+
+            $result = new AttendanceOverviewResource($response_data, 'Success Get Attendance Overview');
             return $this->respond($result);
         } catch (\Exception $e) {
             return $this->exceptionError($e->getMessage());
