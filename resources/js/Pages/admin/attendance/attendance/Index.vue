@@ -15,7 +15,7 @@ import AppLayout from "@/layouts/apps.vue";
 import VBreadcrumb from "@/components/VBreadcrumb/index.vue";
 import VLoading from "@/components/VLoading/index.vue";
 import VDataTable from "@/components/VDataTable/index.vue";
-import VPagination from '@/components/VPagination/index.vue'
+import VPagination from "@/components/VPagination/index.vue";
 import VSelect from "@/components/VSelect/index.vue";
 import VPresent from "@/components/src/icons/solid/VPresent.vue";
 import VLate from "@/components/src/icons/solid/VLate.vue";
@@ -162,24 +162,24 @@ const getAttendanceOverviewData = debounce(async (page) => {
 }, 500);
 
 const pagination = ref({
-    count: '',
-    current_page: 1,
-    per_page: '',
-    total: 0,
-    total_pages: 1
-})
+  count: "",
+  current_page: 1,
+  per_page: "",
+  total: 0,
+  total_pages: 1,
+});
 
 const nextPaginate = () => {
-    pagination.value.current_page += 1
-    attendanceListLoading.value = true
-    getAttendanceListData(pagination.value.current_page)
-}
+  pagination.value.current_page += 1;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page);
+};
 
 const previousPaginate = () => {
-    pagination.value.current_page -= 1
-    attendanceListLoading.value = true
-    getAttendanceListData(pagination.value.current_page)
-}
+  pagination.value.current_page -= 1;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page);
+};
 
 const getAttendanceListData = debounce(async (page) => {
   axios
@@ -192,7 +192,7 @@ const getAttendanceListData = debounce(async (page) => {
     })
     .then((res) => {
       attendanceQuery.value = res.data.data;
-      pagination.value = res.data.meta.pagination
+      pagination.value = res.data.meta.pagination;
     })
     .catch((res) => {
       notify(
@@ -559,7 +559,15 @@ onMounted(() => {
         </tr>
         <tr v-for="(data, index) in attendanceQuery" :key="index" v-else>
           <td class="px-4 whitespace-nowrap h-16 fixed-left">
-            {{ data.employee_name }}
+            <Link
+              :href="
+                route('attendance.attendance-log-daily.index', {
+                  id: data.employee_id,
+                  filter_date: filter.filtermonth
+                })
+              "
+              >{{ data.employee_name }}</Link
+            >
           </td>
           <td
             class="px-4 whitespace-nowrap h-16"
@@ -598,7 +606,11 @@ onMounted(() => {
         </tr>
       </VDataTable>
       <div class="py-6">
-          <VPagination :pagination="pagination" @next="nextPaginate" @previous="previousPaginate" />
+        <VPagination
+          :pagination="pagination"
+          @next="nextPaginate"
+          @previous="previousPaginate"
+        />
       </div>
     </section>
   </div>

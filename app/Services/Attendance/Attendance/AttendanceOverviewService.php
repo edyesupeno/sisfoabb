@@ -144,6 +144,7 @@ class AttendanceOverviewService
 
         foreach ($employees as $employee) {
             $data = [
+                'employee_id' => $employee->id,
                 'employee_name' => $employee->user_detail->name
             ];
 

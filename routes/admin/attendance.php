@@ -6,6 +6,7 @@ use App\Actions\Utility\GetFile;
 use App\Actions\Utility\Leave\GenerateLeavePeriod;
 use App\Helpers\Utility\Time;
 use App\Http\Controllers\Attendance\Attendance\AttendanceDailyController;
+use App\Http\Controllers\Attendance\Attendance\AttendanceLogDailyController;
 use App\Http\Controllers\Attendance\Schedule\ScheduleController;
 use App\Http\Controllers\Attendance\Shift\ShiftController;
 use App\Http\Controllers\Attendance\Attendance\AttendanceOverviewController;
@@ -55,9 +56,16 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('get-attendance-recap', 'getAttendanceRecap')->name('getdatarecap');
         Route::get('get-attendance-overview', 'getAttendanceOverviewData')->name('getdataoverview');
         Route::get('export-attendance-daily', 'getAttendanceListExport')->name('exportAttendanceDaily');
-        Route::get('testing', function () {
-            return view('export-daily-attendances');
-        });
+    });
+
+    Route::controller(AttendanceLogDailyController::class)->prefix('attendance-log-daily')->name('attendance-log-daily.')->group(function () {
+        // Route::get('testing', function () {
+        //     return view('export-log-daily-attendances');
+        // });
+        Route::get('{id}', 'attendanceLogIndex')->name('index');
+        Route::get('{id}/get-data', 'getData')->name('getdata');
+        Route::get('{id}/get-attendance-overview', 'getAttendanceLogOverviewData')->name('getdataoverview');
+        Route::get('{id}/export-attendance-log-daily', 'getDataExport')->name('exportAttendanceLogDaily');
     });
 });
 

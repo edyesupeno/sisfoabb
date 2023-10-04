@@ -106,4 +106,74 @@ class AttendanceLogService
 
         return $result;
     }
+
+    public function getDataExport($employee, $request)
+    {
+        $search = $request->search;
+        $filter_date = $request->filter_date;
+        $filter_status = $request->filter_status;
+        $date = collect($filter_date)->map(function ($q) {
+            return Carbon::parse($q)->format('Y-m-d');
+        })->toArray();
+
+        // Get company
+        $query = Attendance::where('user_id', $employee->user_id);
+
+        // Filter By Params
+        $query->when(request('search', false), function ($q) use ($search) {
+            $q->where('date_clock', $search);
+        });
+        $query->when(request('filter_date', false), function ($q) use ($date) {
+            $q->whereBetween('date_clock', $date);
+        });
+
+        // Get Status Checker Required Data
+        $schedules =  Schedule::where('user_id', $employee->user_id)->whereBetween('date', $date)->get();
+        $leaves = Leave::where('start_date', '<=', $date[0])->where('end_date', '>=', $date[1])->where('status', 'approved')->where('employee_id', $employee->id)->get();
+        $generateLeavePeriod = new GenerateLeavePeriod();
+        $leavePeriod = $generateLeavePeriod->handle($leaves);
+
+        // Check Status Attendance
+        $checkStatusAttendance = new CheckStatusAttendance();
+        if($filter_status){
+            $query = $query->get()->filter(function ($q) use ($checkStatusAttendance, $leavePeriod, $schedules, $filter_status){
+                $schedule = collect($schedules)->where('date', $q->date_clock)->first();
+                $status = $checkStatusAttendance->handle($q, $schedule, $leavePeriod, $q->date_clock);
+
+                if($status !== '' && $status === $filter_status) {
+                    return $q;
+                }
+            })->map(function ($q) use ($checkStatusAttendance, $leavePeriod, $schedules) {
+                $schedule = collect($schedules)->where('date', $q->date_clock)->first();
+                $status = $checkStatusAttendance->handle($q, $schedule, $leavePeriod, $q->date_clock);
+
+                return [
+                    'id' => $q->id,
+                    'date_clock' => $q->date_clock,
+                    'clock_in' => $q->clock_in,
+                    'clock_out' => $q->clock_out,
+                    'total_work_hours' => $q->total_work_hours,
+                    'status' => $status,
+                ];
+            });
+        }else{
+            $query = $query->get()->map(function ($q) use ($checkStatusAttendance, $leavePeriod, $schedules) {
+                $schedule = collect($schedules)->where('date', $q->date_clock)->first();
+                $status = $checkStatusAttendance->handle($q, $schedule, $leavePeriod, $q->date_clock);
+
+                return [
+                    'id' => $q->id,
+                    'date_clock' => $q->date_clock,
+                    'clock_in' => $q->clock_in,
+                    'clock_out' => $q->clock_out,
+                    'total_work_hours' => $q->total_work_hours,
+                    'status' => $status,
+                ];
+            });;
+        }
+
+        // $paginate = new PaginateCollection();
+        // return $paginate->handle($query, 10);
+        return $query;
+    }
 }
