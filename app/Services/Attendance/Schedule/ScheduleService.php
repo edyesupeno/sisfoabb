@@ -83,13 +83,15 @@ class ScheduleService
                     }
                 });
             }else{
-                $dataUser = User::all();
+                $dataUser = User::paginate(5);
+                // $dataUser = User::all();
             }
         }
        
 
 
-        $users = $request->search ||  $request->filter_branch ? $dataUser->get() : $dataUser;
+        // $users = $request->search ||  $request->filter_branch ? $dataUser->get() : $dataUser;
+        $users = $request->search ||  $request->filter_branch ? $dataUser->paginate(5) : $dataUser;
 
 
 

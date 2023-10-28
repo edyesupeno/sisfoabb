@@ -78,7 +78,7 @@ class AttendanceDailyController extends AdminBaseController
     public function getAttendanceListExport(Request $request)
     {
         $date = $request->filter_date ?: Carbon::now()->format('Y-m-d');
-        $data = $this->attendanceDailyService->getAttendanceList($request);
+        $data = $this->attendanceDailyService->getAttendanceListExport($request)['attendances'];
 
         // return $this->respond($data[0]['attendances']['clock_in']);
         return Excel::download(new AttendanceDailyExport(

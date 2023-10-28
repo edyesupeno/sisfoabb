@@ -70,6 +70,7 @@ const downloadExcel = async () => {
       }
     )
     .then((res) => {
+      console.log(res.data)
       const contentDisposition = res.headers["content-disposition"];
       const fileName = contentDisposition
         ? contentDisposition.split("filename=")[1].trim()

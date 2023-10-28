@@ -14,7 +14,7 @@ class GetScheduleResource extends ResourceCollection
             'meta' => [
                 "success" => true,
                 "message" => "Success get schedule lists",
-                // 'pagination' => $this->metaData()
+                'pagination' => $this->metaData()
             ]
         ];
     }
@@ -33,17 +33,17 @@ class GetScheduleResource extends ResourceCollection
         });
     }
 
-    // private function metaData()
-    // {
-    //     return [
-    //         "total" => $this->total(),
-    //         "count" => $this->count(),
-    //         "per_page" => (int)$this->perPage(),
-    //         "current_page" => $this->currentPage(),
-    //         "total_pages" => $this->lastPage(),
-    //         "links" => [
-    //             "next" => $this->nextPageUrl()
-    //         ],
-    //     ];
-    // }
+    private function metaData()
+    {
+        return [
+            "total" => $this->total(),
+            "count" => $this->count(),
+            "per_page" => (int)$this->perPage(),
+            "current_page" => $this->currentPage(),
+            "total_pages" => $this->lastPage(),
+            "links" => [
+                "next" => $this->nextPageUrl()
+            ],
+        ];
+    }
 }
