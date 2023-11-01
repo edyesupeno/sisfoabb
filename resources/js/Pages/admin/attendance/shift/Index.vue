@@ -143,6 +143,7 @@ const handleEditModalForm = (data) => {
     updateAction.value = true
     itemSelected.value = data
     openModalForm.value = true
+    console.log(data)
 }
 
 const successSubmit = () => {

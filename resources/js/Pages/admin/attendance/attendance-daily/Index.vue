@@ -23,20 +23,26 @@ import VAbsent from "@/components/src/icons/solid/VAbsent.vue";
 import VClockoutEarly from "@/components/src/icons/solid/VClockoutEarly.vue";
 import VLeave from "@/components/src/icons/solid/VLeave.vue";
 import VEmpty from "@/components/src/icons/VEmpty.vue";
+import VEdit from '@/components/src/icons/VEdit.vue';
 import VHoliday from "@/components/src/icons/solid/VHoliday.vue";
 import VUnassign from "@/components/src/icons/solid/VUnassign.vue";
 import VModalForm from "./ModalForm.vue";
 import VModalExport from "./ModalExport.vue";
+import VModalEdit from "./ModalEdit.vue";
 import VButton from "@/components/VButton/index.vue";
+import VDropdownEditMenu from '@/components/VDropdownEditMenu/index.vue';
 import { Link } from "@inertiajs/inertia-vue3";
 
 const itemSelected = ref({});
 const openModalForm = ref(false);
 const openModalExport = ref(false);
+const openModalEdit = ref(false);
 const attendanceQuery = ref([]);
 const attendanceRecapQuery = ref([]);
 const attendanceListHeader = ref([]);
 const filterBranchValue = ref(1);
+
+const dataAttendanceEdit = ref({});
 
 const breadcrumb = [
   {
@@ -187,6 +193,7 @@ const getAttendanceListData = debounce(async (page) => {
     .then((res) => {
       attendanceQuery.value = res.data.data;
       pagination.value = res.data.meta.pagination
+      console.log(res.data.data)
     })
     .catch((res) => {
       notify(
@@ -227,6 +234,21 @@ const successExport = () => {
 
 const closeModalExport = () => {
   openModalExport.value = false;
+};
+
+const handleAddModalEdit = (dataAttendance) => {
+  openModalEdit.value = true;
+  dataAttendanceEdit.value = dataAttendance;
+};
+
+const successEdit = () => {
+  openModalEdit.value = false;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page)
+};
+
+const closeModalEdit = () => {
+  openModalEdit.value = false;
 };
 
 onMounted(() => {
@@ -342,6 +364,7 @@ onMounted(() => {
           'Clock In',
           'Clock Out',
           'Date',
+          'Action'
         ]"
         v-if="!attendanceListLoading"
         wrapperClass="!px-0"
@@ -467,6 +490,19 @@ onMounted(() => {
           <td class="px-4 whitespace-nowrap h-10 text-right">
             <span>{{ dayjs(data.date).format("DD MMMM YYYY")}}</span>
           </td>
+          <td class="px-4 whitespace-nowrap h-10 text-right">
+            <VDropdownEditMenu v-if="data.attendances.status == 'late' || data.attendances.status == 'present' || data.attendances.status == 'absent' || data.attendances.status == 'checkout_early' || data.attendances.status == 'leave' || data.attendances.status == 'holiday'" class="relative inline-flex r-0" :align="'right'"
+                :last="index === attendanceQuery.length - 1 ? true : false">
+                <li class="cursor-pointer hover:bg-slate-100" @click="handleAddModalEdit(data.attendances)">
+                    <div class="flex items-center space-x-2 p-3">
+                        <span>
+                            <VEdit/>
+                        </span>
+                        <span>Edit</span>
+                    </div>
+                </li>
+            </VDropdownEditMenu>
+          </td>
         </tr>
       </VDataTable>
       <div class="py-6">
@@ -481,6 +517,14 @@ onMounted(() => {
     @successSubmit="successExport"
     :additional="additional"
     :branch="filterBranchValue"
+  />
+  <VModalEdit
+    :open-dialog="openModalEdit"
+    @close="closeModalEdit"
+    @successUpdate="successEdit"
+    :additional="additional"
+    :branch="filterBranchValue"
+    :datas="dataAttendanceEdit"
   />
   <VModalForm
     :data="itemSelected"

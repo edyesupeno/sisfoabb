@@ -46,10 +46,10 @@ class AttendanceDailyController extends AdminBaseController
 
             $response_data = [];
             $data = $this->attendanceDailyService->getAttendanceRecap($request);
-            foreach($data as $item){
+            foreach ($data as $item) {
                 $totals = 0;
-                foreach($item['recaps'] as $tgl => $itemRecap){
-                    if(Carbon::parse($filter_date)->format('j') == $tgl){
+                foreach ($item['recaps'] as $tgl => $itemRecap) {
+                    if (Carbon::parse($filter_date)->format('j') == $tgl) {
                         $totals = $itemRecap['total_recap'];
                         break;
                     }
@@ -87,4 +87,21 @@ class AttendanceDailyController extends AdminBaseController
         ), 'attendances-daily-export.xlsx');
     }
 
+    public function updateAttendance(Request $request)
+    {
+        $id = $request->id;
+        $clock_in = Carbon::parse($request->clock_in)->format('H:i:s');
+        $clock_out = Carbon::parse($request->clock_out)->format('H:i:s');
+
+        $attendance = Attendance::where('id', $id)->first();
+        $attendance->update([
+            'clock_in' => $clock_in,
+            'clock_out' => $clock_out
+        ]);
+
+        return $this->respond([
+            "success" => true,
+            "message" => "Success update attendance"
+        ]);
+    }
 }

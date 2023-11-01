@@ -56,6 +56,7 @@ Route::prefix('attendance')->name('attendance.')->group(function () {
         Route::get('get-attendance-recap', 'getAttendanceRecap')->name('getdatarecap');
         Route::get('get-attendance-overview', 'getAttendanceOverviewData')->name('getdataoverview');
         Route::get('export-attendance-daily', 'getAttendanceListExport')->name('exportAttendanceDaily');
+        Route::post('update-attendance-daily', 'updateAttendance')->name('updateAttendance');
     });
 
     Route::controller(AttendanceLogDailyController::class)->prefix('attendance-log-daily')->name('attendance-log-daily.')->group(function () {
