@@ -19,6 +19,7 @@ use Carbon\CarbonPeriod;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Resources\Attendances\Schedule\SubmitScheduleResource;
 use App\Services\Attendance\Attendance\AttendanceDailyService;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceDailyController extends AdminBaseController
 {
@@ -102,6 +103,38 @@ class AttendanceDailyController extends AdminBaseController
         return $this->respond([
             "success" => true,
             "message" => "Success update attendance"
+        ]);
+    }
+
+    public function saveLembur(Request $request)
+    {
+        $data = [
+            'id_employee' => $request->user_id,
+            'type' => 'Approval Lembur',
+            'id_branch' => $request->branch_id,
+            'keterangan' => $request->note,
+            'jam_masuk' => Carbon::parse($request->clock_in)->format('H:i:s'),
+            'jam_keluar' => Carbon::parse($request->clock_out)->format('H:i:s'),
+            'status' => 'approved',
+            'tanggal' => Carbon::parse($request->date . ' ' . date('H:i:s'))->format('Y-m-d H:i:s'),
+            'lembur' => Carbon::parse($request->date . ' ' . date('H:i:s'))->format('Y-m-d H:i:s'),
+        ];
+
+        DB::table('lembur')->insert($data);
+
+        return $this->respond([
+            "success" => true,
+            "message" => "Success save lembur"
+        ]);
+    }
+
+    public function cancelLembur($id)
+    {
+        DB::table('lembur')->where('id', $id)->delete();
+
+        return $this->respond([
+            "success" => true,
+            "message" => "Success cancel lembur"
         ]);
     }
 }

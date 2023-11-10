@@ -8,14 +8,14 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { notify } from "notiwind";
 import { Head } from "@inertiajs/inertia-vue3";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, reactive } from "vue";
 import debounce from "@/composables/debounce";
 import { object, string } from "vue-types";
 import AppLayout from "@/layouts/apps.vue";
 import VBreadcrumb from "@/components/VBreadcrumb/index.vue";
 import VLoading from "@/components/VLoading/index.vue";
 import VDataTable from "@/components/VDataTable/index.vue";
-import VPagination from '@/components/VPagination/index.vue'
+import VPagination from "@/components/VPagination/index.vue";
 import VSelect from "@/components/VSelect/index.vue";
 import VPresent from "@/components/src/icons/solid/VPresent.vue";
 import VLate from "@/components/src/icons/solid/VLate.vue";
@@ -23,26 +23,32 @@ import VAbsent from "@/components/src/icons/solid/VAbsent.vue";
 import VClockoutEarly from "@/components/src/icons/solid/VClockoutEarly.vue";
 import VLeave from "@/components/src/icons/solid/VLeave.vue";
 import VEmpty from "@/components/src/icons/VEmpty.vue";
-import VEdit from '@/components/src/icons/VEdit.vue';
+import VEdit from "@/components/src/icons/VEdit.vue";
 import VHoliday from "@/components/src/icons/solid/VHoliday.vue";
 import VUnassign from "@/components/src/icons/solid/VUnassign.vue";
 import VModalForm from "./ModalForm.vue";
 import VModalExport from "./ModalExport.vue";
 import VModalEdit from "./ModalEdit.vue";
+import VModalLembur from "./ModalLembur.vue";
 import VButton from "@/components/VButton/index.vue";
-import VDropdownEditMenu from '@/components/VDropdownEditMenu/index.vue';
+import VDropdownEditMenu from "@/components/VDropdownEditMenu/index.vue";
 import { Link } from "@inertiajs/inertia-vue3";
+import VAlert from "@/components/VAlert/index.vue";
 
 const itemSelected = ref({});
 const openModalForm = ref(false);
 const openModalExport = ref(false);
 const openModalEdit = ref(false);
+const openModalInputLembur = ref(false);
 const attendanceQuery = ref([]);
 const attendanceRecapQuery = ref([]);
 const attendanceListHeader = ref([]);
 const filterBranchValue = ref(1);
 
 const dataAttendanceEdit = ref({});
+const dataAttendanceInputLembur = ref({});
+
+const openAlertCancelLembur = ref(false);
 
 const breadcrumb = [
   {
@@ -72,7 +78,14 @@ const attendanceListLoading = ref(true);
 //   currentDate: dayjs().format("dd MMMM YYYY"),
 // });
 const filter = ref({
-  date: new Date()
+  date: new Date(),
+});
+
+const alertCancelLemburData = reactive({
+  headerLabel: "",
+  contentLabel: "",
+  closeLabel: "",
+  submitLabel: "",
 });
 
 const attendanceOverview = ref([
@@ -160,26 +173,25 @@ const getAttendanceOverviewData = debounce(async (page) => {
     .finally(() => (overviewLoading.value = false));
 }, 500);
 
-
 const pagination = ref({
-    count: '',
-    current_page: 1,
-    per_page: '',
-    total: 0,
-    total_pages: 1
-})
+  count: "",
+  current_page: 1,
+  per_page: "",
+  total: 0,
+  total_pages: 1,
+});
 
 const nextPaginate = () => {
-    pagination.value.current_page += 1
-    attendanceListLoading.value = true
-    getAttendanceListData(pagination.value.current_page)
-}
+  pagination.value.current_page += 1;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page);
+};
 
 const previousPaginate = () => {
-    pagination.value.current_page -= 1
-    attendanceListLoading.value = true
-    getAttendanceListData(pagination.value.current_page)
-}
+  pagination.value.current_page -= 1;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page);
+};
 
 const getAttendanceListData = debounce(async (page) => {
   axios
@@ -192,8 +204,8 @@ const getAttendanceListData = debounce(async (page) => {
     })
     .then((res) => {
       attendanceQuery.value = res.data.data;
-      pagination.value = res.data.meta.pagination
-      console.log(res.data.data)
+      pagination.value = res.data.meta.pagination;
+      console.log(res.data.data);
     })
     .catch((res) => {
       notify(
@@ -244,11 +256,85 @@ const handleAddModalEdit = (dataAttendance) => {
 const successEdit = () => {
   openModalEdit.value = false;
   attendanceListLoading.value = true;
-  getAttendanceListData(pagination.value.current_page)
+  getAttendanceListData(pagination.value.current_page);
 };
 
 const closeModalEdit = () => {
   openModalEdit.value = false;
+};
+
+const handleAddModalInputLembur = (dataLembur) => {
+  openModalInputLembur.value = true;
+  dataAttendanceInputLembur.value = dataLembur;
+};
+
+const successInputLembur = () => {
+  openModalInputLembur.value = false;
+  attendanceListLoading.value = true;
+  getAttendanceListData(pagination.value.current_page);
+};
+
+const closeModalInputLembur = () => {
+  openModalInputLembur.value = false;
+};
+
+const alertCancelLembur = (data) => {
+  itemSelected.value = data;
+  openAlertCancelLembur.value = true;
+  alertCancelLemburData.headerLabel = "Are you sure to delete this?";
+  alertCancelLemburData.contentLabel = "You won't be able to revert this!";
+  alertCancelLemburData.closeLabel = "Cancel";
+  alertCancelLemburData.submitLabel = "Delete";
+};
+
+const closeAlertCancelLembur = () => {
+  itemSelected.value = ref({});
+  openAlertCancelLembur.value = false;
+};
+
+const cancelLemburHandle = () => {
+  axios
+    .delete(
+      route("attendance.attendance-daily.cancelLembur", {
+        id: itemSelected.value.lembur.data.id,
+      })
+    )
+    .then((res) => {
+      notify(
+        {
+          type: "success",
+          group: "top",
+          text: res.message,
+        },
+        2500
+      );
+      openAlertCancelLembur.value = false;
+      attendanceListLoading.value = true;
+      getAttendanceListData(pagination.value.current_page);
+    })
+    .catch((res) => {
+      const result = res.response.data;
+      const metaError = res.response.data.meta.error;
+      if (metaError) {
+        notify(
+          {
+            type: "error",
+            group: "top",
+            text: metaError,
+          },
+          2500
+        );
+      } else {
+        notify(
+          {
+            type: "error",
+            group: "top",
+            text: result.message,
+          },
+          2500
+        );
+      }
+    });
 };
 
 onMounted(() => {
@@ -364,7 +450,7 @@ onMounted(() => {
           'Clock In',
           'Clock Out',
           'Date',
-          'Action'
+          'Action',
         ]"
         v-if="!attendanceListLoading"
         wrapperClass="!px-0"
@@ -451,10 +537,11 @@ onMounted(() => {
             <span
               v-if="
                 data.schedules != null && data.schedules.shift_detail != null
-              ">
+              "
+            >
               {{ data.schedules.shift_detail.start_time }} -
               {{ data.schedules.shift_detail.end_time }}
-              </span>
+            </span>
             <div
               class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
               style="font-size: 12px"
@@ -464,10 +551,12 @@ onMounted(() => {
           <td class="px-4 whitespace-nowrap h-10 text-right">
             <span
               v-if="
-                data.attendances.clock_in != null && data.attendances.clock_in != '-'
-              ">
+                data.attendances.clock_in != null &&
+                data.attendances.clock_in != '-'
+              "
+            >
               {{ data.attendances.clock_in }}
-              </span>
+            </span>
             <div
               class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
               style="font-size: 12px"
@@ -477,10 +566,12 @@ onMounted(() => {
           <td class="px-4 whitespace-nowrap h-10 text-right">
             <span
               v-if="
-                data.attendances.clock_out != null && data.attendances.clock_out != '-'
-              ">
+                data.attendances.clock_out != null &&
+                data.attendances.clock_out != '-'
+              "
+            >
               {{ data.attendances.clock_out }}
-              </span>
+            </span>
             <div
               class="py-[2px] px-2 bg-grey text-white rounded-full inline-flex"
               style="font-size: 12px"
@@ -488,25 +579,56 @@ onMounted(() => {
             ></div>
           </td>
           <td class="px-4 whitespace-nowrap h-10 text-right">
-            <span>{{ dayjs(data.date).format("DD MMMM YYYY")}}</span>
+            <span>{{ dayjs(data.date).format("DD MMMM YYYY") }}</span>
           </td>
           <td class="px-4 whitespace-nowrap h-10 text-right">
-            <VDropdownEditMenu v-if="data.attendances.status == 'late' || data.attendances.status == 'present' || data.attendances.status == 'absent' || data.attendances.status == 'checkout_early' || data.attendances.status == 'leave' || data.attendances.status == 'holiday'" class="relative inline-flex r-0" :align="'right'"
-                :last="index === attendanceQuery.length - 1 ? true : false">
-                <li class="cursor-pointer hover:bg-slate-100" @click="handleAddModalEdit(data.attendances)">
-                    <div class="flex items-center space-x-2 p-3">
-                        <span>
-                            <VEdit/>
-                        </span>
-                        <span>Edit</span>
-                    </div>
-                </li>
+            <VDropdownEditMenu
+              class="relative inline-flex r-0"
+              :align="'right'"
+              :last="index === attendanceQuery.length - 1 ? true : false"
+            >
+              <li
+                v-if="
+                  data.attendances.status == 'late' ||
+                  data.attendances.status == 'present' ||
+                  data.attendances.status == 'absent' ||
+                  data.attendances.status == 'checkout_early' ||
+                  data.attendances.status == 'leave' ||
+                  data.attendances.status == 'holiday'
+                "
+                class="cursor-pointer hover:bg-slate-100"
+                @click="handleAddModalEdit(data.attendances)"
+              >
+                <div class="flex items-center space-x-2 p-3">
+                  <span>Edit</span>
+                </div>
+              </li>
+              <li
+                class="cursor-pointer hover:bg-slate-100"
+                @click="
+                  data.lembur.status == 'true'
+                    ? alertCancelLembur(data)
+                    : handleAddModalInputLembur(data)
+                "
+              >
+                <div class="flex items-center space-x-2 p-3">
+                  <span>{{
+                    data.lembur.status == "true"
+                      ? "Cancel Lembur"
+                      : "Input Lembur"
+                  }}</span>
+                </div>
+              </li>
             </VDropdownEditMenu>
           </td>
         </tr>
       </VDataTable>
       <div class="py-6">
-          <VPagination :pagination="pagination" @next="nextPaginate" @previous="previousPaginate" />
+        <VPagination
+          :pagination="pagination"
+          @next="nextPaginate"
+          @previous="previousPaginate"
+        />
       </div>
     </section>
   </div>
@@ -526,10 +648,28 @@ onMounted(() => {
     :branch="filterBranchValue"
     :datas="dataAttendanceEdit"
   />
+  <VModalLembur
+    :open-dialog="openModalInputLembur"
+    @close="closeModalInputLembur"
+    @successUpdate="successInputLembur"
+    :additional="additional"
+    :branch="filterBranchValue"
+    :datas="dataAttendanceInputLembur"
+  />
   <VModalForm
     :data="itemSelected"
     :open-dialog="openModalForm"
     @close="closeModalForm"
+  />
+  <VAlert
+    :open-dialog="openAlertCancelLembur"
+    @closeAlert="closeAlertCancelLembur"
+    @submitAlert="cancelLemburHandle"
+    type="danger"
+    :headerLabel="alertCancelLemburData.headerLabel"
+    :content-label="alertCancelLemburData.contentLabel"
+    :close-label="alertCancelLemburData.closeLabel"
+    :submit-label="alertCancelLemburData.submitLabel"
   />
 </template>
 

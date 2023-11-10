@@ -15,6 +15,7 @@ use App\Actions\Utility\Attendance\CheckStatusAttendance;
 use App\Actions\Utility\Attendance\CalculateAttendanceStatus;
 use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AttendanceDailyService
 {
@@ -107,7 +108,7 @@ class AttendanceDailyService
         $filter_date = $request->filter_date ?: Carbon::now();
         $filter_branch = $request->filter_branch ?: 1;
 
-        // Generate date 
+        // Generate date
         $month = Carbon::parse($filter_date)->format('m');
         $year = Carbon::parse($filter_date)->format('Y');
         $current_month = Carbon::now()->format('m');
@@ -125,6 +126,7 @@ class AttendanceDailyService
         $employees = Employee::where('branch_id', $filter_branch)->paginate(10);
         $attendances = Attendance::with(['user_detail'])->whereMonth('date_clock', $month)->whereYear('date_clock', $year)->whereIn('user_id', $employees->pluck('user_id'))->get();
         $schedules =  Schedule::with(['shift_detail'])->whereMonth('date', $month)->whereYear('date', $year)->whereIn('user_id', $employees->pluck('user_id'))->get();
+        $lembur = DB::table('lembur')->whereYear('lembur', $current_year)->whereMonth('lembur', $current_month)->whereDay('lembur', $current_day)->whereIn('id_employee', $employees->pluck('user_id'))->get();
         $leaves = Leave::where(function ($query) use ($month) {
             $query->whereMonth('start_date', $month)->orWhereMonth('end_date', $month);
         })->where(function ($query) use ($year) {
@@ -140,6 +142,7 @@ class AttendanceDailyService
 
         foreach ($employees as $employee) {
             $data = [
+                'employee_user_id' => $employee->user_id,
                 'employee_name' => $employee->user_detail->name,
                 'date' => Carbon::parse($filter_date)->format('Y-m-d')
             ];
@@ -193,6 +196,12 @@ class AttendanceDailyService
             $data['attendances'] = $data['attendances'][Carbon::parse($filter_date)->format('j')];
             $data['schedules'] = collect($schedules)->where('user_id', $employee->user_id)->where('date', Carbon::parse($filter_date)->format('Y-m-d'))->first();
 
+            $lemburStatus = collect($lembur)->where('id_employee', $employee->user_id)->first();
+            $data['lembur'] = [
+                'status' => $lemburStatus ? 'true' : 'false',
+                'data' => $lemburStatus
+            ];
+
             array_push($attendance_list, $data);
         }
 
@@ -216,7 +225,7 @@ class AttendanceDailyService
         //     $filter_date = $periodeListItem;
         //     $filter_branch = $request->branch_id ?: 1;
 
-        //     // Generate date 
+        //     // Generate date
         //     $month = Carbon::parse($filter_date)->format('m');
         //     $year = Carbon::parse($filter_date)->format('Y');
         //     $current_month = Carbon::now()->format('m');
@@ -325,7 +334,7 @@ class AttendanceDailyService
         $filter_date = $request->filter_date ?: Carbon::now();
         $filter_branch = $request->filter_branch ?: 1;
 
-        // Generate date 
+        // Generate date
         $month = Carbon::parse($filter_date)->format('m');
         $year = Carbon::parse($filter_date)->format('Y');
         $current_month = Carbon::now()->format('m');
@@ -424,7 +433,7 @@ class AttendanceDailyService
         $filter_branch = $request->filter_branch ?: 1;
         $recap_lists = ['present', 'late', 'absent', 'clockout_early', 'leave', 'holiday'];
 
-        // Generate date 
+        // Generate date
         $month = Carbon::parse($filter_date)->format('m');
         $year = Carbon::parse($filter_date)->format('Y');
         $listDateByMonth = Carbon::createFromFormat('Y-m-d', $year . '-' . $month . '-' . 1);
