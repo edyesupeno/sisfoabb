@@ -22,5 +22,8 @@ Route::prefix('approval')->name('approval.')->group(function () {
         Route::post('post-lembur', 'updateStatusLembur')->name('updateStatusLembur');
         Route::put('{id}/approve', 'approveApproval')->name('approve');
         Route::put('{id}/reject', 'rejectApproval')->name('reject');
+
+        Route::get('/lembur-export', 'exportTemplate')->name('lemburexport');
+        Route::post('/lembur-import', 'importLembur')->name('lemburimport');
     });
 });
