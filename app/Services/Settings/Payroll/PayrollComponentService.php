@@ -47,7 +47,8 @@ class PayrollComponentService
         }else if ($request->action === 'earning_overtime') {
             $input = $request->only(['is_editable', 'is_taxable']);
         }else {
-            $input = $request->only(['name', 'is_editable', 'is_taxable']);
+            $input = $request->only(['name', 'pay_type', 'type', 'is_editable', 'is_taxable']);
+            // $input = $request->only(['name', 'is_editable', 'is_taxable']);
         }
 
         $payrollComponent->update($input);

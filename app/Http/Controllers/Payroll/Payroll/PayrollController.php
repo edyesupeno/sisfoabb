@@ -136,15 +136,22 @@ class PayrollController extends AdminBaseController
     {
         $payrollEmployee = $this->runPayrollService->getPayrollEmployeeDetail($id);
 
+        $tunjangan_jabatan = collect($this->runPayrollService->getEarningEmployeeSlipComponents($id))->firstWhere('name', 'TUNJANGAN JABATAN')['value'] + $payrollEmployee->amount;
+
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/detail', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
                 'payroll_employee' => $payrollEmployee,
                 'payroll_date' => Carbon::parse($payrollEmployee->payroll_slip->date)->format('F Y'),
                 'base_salary' => number_format($payrollEmployee->amount, 2, ',', '.'),
-                'total_earning' => number_format($payrollEmployee->earning_total + $payrollEmployee->amount, 2, ',', '.'),
-                'total_deduction' => number_format($payrollEmployee->deduction_total, 2, ',', '.'),
+                'total_earning' => number_format($payrollEmployee->earning_total + $payrollEmployee->amount + (($tunjangan_jabatan * 4.89)/100), 2, ',', '.'),
+                'total_deduction' => number_format($payrollEmployee->deduction_total + (($tunjangan_jabatan * 4.89)/100), 2, ',', '.'),
                 'take_home_pay' => number_format($payrollEmployee->total_amount, 2, ',', '.'),
+                'tunjangan_bpjs' => number_format($tunjangan_jabatan, 2, ',', '.'),
+                'bpjs_tk' => number_format(($tunjangan_jabatan * 4.89)/100, 2, ',', '.'),
+                'bpjs_jht' => number_format(($tunjangan_jabatan * 3.70)/100, 2, ',', '.'),
+                'bpjs_jkk' => number_format(($tunjangan_jabatan * 0.89)/100, 2, ',', '.'),
+                'bpjs_jkm' => number_format(($tunjangan_jabatan * 0.30)/100, 2, ',', '.'),
                 'earning_components' => $this->runPayrollService->getEarningEmployeeSlipComponents($id),
                 'deduction_components' => $this->runPayrollService->getDeductionEmployeeSlipComponents($payrollEmployee),
                 'start_date' => $payrollEmployee->payroll_slip->date,
@@ -152,6 +159,7 @@ class PayrollController extends AdminBaseController
                 'user_id' => $payrollEmployee->employee_detail->user_id
             ]
         ]);
+
     }
 
     public function payrollEmployeeEdit($id)

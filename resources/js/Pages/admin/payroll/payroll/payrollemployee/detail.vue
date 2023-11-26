@@ -84,6 +84,8 @@ const initData = () => {
             value: props.additional.payroll_employee.employee_detail.phone_number
         }
     ]
+
+    console.log(props.additional);
 }
 
 // Attendance
@@ -255,7 +257,7 @@ const paginationOT = ref({
 })
 const itemSelectedOT = ref({})
 const openModalFormOT = ref(false)
-const headsOT = ["Type", "Status", "Created By", "Created At", "Branch"]
+const headsOT = ["Created By", "Jam Masuk", "Jam Keluar", "Keterangan", "Status", "Created At", "Branch"]
 const isLoadingOT = ref(true)
 const isapprovalOT = ref(true)
 
@@ -268,8 +270,8 @@ const getData2 = debounce(async (page) => {
             // filter_date: ['2022-05-01T17:00:00.000Z', '2023-05-30T17:00:00.000Z']
         }
     }).then((res) => {
-        query2.value = res.data.data
-        console.log('TES', query2.value, res.data.data)
+        query2.value = res.data
+        console.log('TES', query2.value, res.data)
     }).catch((res) => {
         notify({
             type: "error",
@@ -432,6 +434,38 @@ onMounted(() => {
                                 Rp{{ additional.base_salary }}
                             </div>
                         </div>
+                        <div class="flex justify-between">
+                            <div>
+                                BPJS TK (4,89%)
+                            </div>
+                            <div>
+
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>1.</b> JHT (3,70%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_jht }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>2.</b> JKK (0,89%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_jkk }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                 <b>3.</b> JKM (0,30%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_jkm }}
+                            </div>
+                        </div>
                         <div class="flex justify-between" v-for="(data, index) in additional.earning_components" :key="index">
                             <div>
                                 {{ data.name }}
@@ -456,11 +490,19 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Deduction -->
                 <div>
                     <div class="bg-sky-100 text-center p-2 font-bold text-md rounded-md border border-sky-100 mb-2">Deduction</div>
                     <div class="px-2 space-y-2">
+                        <div class="flex justify-between">
+                            <div>
+                                BPJS TK (4,89%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_tk }}
+                            </div>
+                        </div>
                         <div class="flex justify-between" v-for="(data, index) in additional.deduction_components" :key="index">
                             <div>
                                 {{ data.name }}
@@ -568,7 +610,7 @@ onMounted(() => {
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.clock_in }} </td>
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.clock_out }} </td>
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.work_hours }} </td>
-                                <td class="px-4 whitespace-nowrap h-16 capitalize"> 
+                                <td class="px-4 whitespace-nowrap h-16 capitalize">
                                     <VBadge :text="data.status.replace(/_/g, ' ')" :color="getTypeStatus(data.status)" :icon="getIconStatus(data.status)" size="sm" />
                                 </td>
                             </tr>
@@ -586,7 +628,7 @@ onMounted(() => {
     <div class="bg-white shadow-lg rounded-sm border border-slate-200" :class="isLoadingOT && 'min-h-[40vh] sm:min-h-[50vh]'">
         <header class="block justify-between items-center sm:flex py-6 px-4">
             <h2 class="font-semibold text-slate-800">
-                Submitting Overtime <span class="text-slate-400 !font-medium ml">{{ paginationOT.total }}</span>
+                Submitting Overtime <span class="text-slate-400 !font-medium ml">{{ query2.total }}</span>
             </h2>
         </header>
 
@@ -596,7 +638,7 @@ onMounted(() => {
                     <VLoading />
                 </td>
             </tr>
-            <tr v-else-if="query2.length === 0 && !isLoadingOT">
+            <tr v-else-if="query2.data.length === 0 && !isLoadingOT">
                 <td class="overflow-hidden my-2" :colspan="headsOT.length">
                     <div class="flex items-center flex-col w-full my-32">
                         <VEmpty />
@@ -604,12 +646,14 @@ onMounted(() => {
                     </div>
                 </td>
             </tr>
-            <tr v-for="(data, index) in query2" :key="index" v-else>
-                <td class="px-4 whitespace-nowrap h-16 capitalize"> Approval Lembur </td>
+            <tr v-for="(data, index) in query2.data" :key="index" v-else>
+                <td class="px-4 whitespace-nowrap h-16"> {{ data.created_by }} </td>
+                <td class="px-4 whitespace-nowrap h-16 capitalize"> {{ data.jam_masuk }} </td>
+                <td class="px-4 whitespace-nowrap h-16 capitalize"> {{ data.jam_keluar }} </td>
+                <td class="px-4 whitespace-nowrap h-16"> {{ data.keterangan }} </td>
                 <td class="px-4 whitespace-nowrap h-16 capitalize">
                     <VBadge :text="data.status" :color="getStatusValueOT(data.status)" size="sm" />
                 </td>
-                <td class="px-4 whitespace-nowrap h-16"> {{ data.created_by }} </td>
                 <td class="px-4 whitespace-nowrap h-16"> {{ data.created_at }} </td>
                 <td class="px-4 whitespace-nowrap h-16"> {{ data.branch }} </td>
             </tr>

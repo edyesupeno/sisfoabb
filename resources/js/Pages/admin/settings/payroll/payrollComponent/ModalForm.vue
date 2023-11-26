@@ -255,8 +255,18 @@ const updateHandle = async () => {
             :errorMessage="formError.type"
             @update:modelValue="formError.type = ''"
             ref="typeSelectHandle"
-            :disabled="updateAction"
           />
+          <!-- <VSelect
+            placeholder="Select Type"
+            :required="true"
+            v-model="form.type"
+            :options="typeOptions"
+            label="Type"
+            :errorMessage="formError.type"
+            @update:modelValue="formError.type = ''"
+            ref="typeSelectHandle"
+            :disabled="updateAction"
+          /> -->
         </div>
         <div class="col-span-2">
           <VSelect
@@ -268,8 +278,18 @@ const updateHandle = async () => {
             :errorMessage="formError.pay_type"
             @update:modelValue="formError.pay_type = ''"
             ref="typeSelectHandle"
-            :disabled="updateAction"
           />
+          <!-- <VSelect
+            placeholder="Select Type"
+            :required="true"
+            v-model="form.pay_type"
+            :options="payTypeOptions"
+            label="Pay Type"
+            :errorMessage="formError.pay_type"
+            @update:modelValue="formError.pay_type = ''"
+            ref="typeSelectHandle"
+            :disabled="updateAction"
+          /> -->
         </div>
           <VSwitch v-model="form.is_editable" label="Editable" type="block" />
           <!-- <VSwitch v-model="form.is_atendance" label="Atendance" type="block" /> -->
