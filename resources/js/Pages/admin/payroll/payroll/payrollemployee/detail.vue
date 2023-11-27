@@ -497,10 +497,71 @@ onMounted(() => {
                     <div class="px-2 space-y-2">
                         <div class="flex justify-between">
                             <div>
-                                BPJS TK (4,89%)
+                                BPJS TK (6,89%)
                             </div>
                             <div>
-                                Rp{{ additional.bpjs_tk }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>1.</b> Perusahaan (4,89%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_tk_perusahaan }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>2.</b> Karyawan (2,00%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_tk_karyawan }}
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div>
+                                BPJS TK Pensiun (3%)
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>1.</b> Perusahaan (2%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_pensiun_perusahaan }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>2.</b> Karyawan (1%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_pensiun_karyawan }}
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <div>
+                                BPJS Kesehatan (5%)
+                            </div>
+                            <div>
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>1.</b> Perusahaan (4%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_kesehatan_perusahaan }}
+                            </div>
+                        </div>
+                        <div class="ml-4 flex justify-between">
+                            <div>
+                                <b>2.</b> Karyawan (1%)
+                            </div>
+                            <div>
+                                Rp{{ additional.bpjs_kesehatan_karyawan }}
                             </div>
                         </div>
                         <div class="flex justify-between" v-for="(data, index) in additional.deduction_components" :key="index">
