@@ -108,7 +108,7 @@ const addEarningComponents = () => {
             value: defaultEarning.value
         };
 
-        form.value.earningComponents.push(obj)   
+        form.value.earningComponents.push(obj)
     }
 }
 
@@ -129,6 +129,8 @@ const addDeductionComponents = () => {
 
         form.value.deductionComponents.push(obj)
     }
+
+    console.log(form.value.deductionComponents);
 }
 
 const submit = async () => {
@@ -143,7 +145,7 @@ const submit = async () => {
                 group: "top",
                 text: res.data.meta.message
             }, 2500)
-            
+
             Inertia.visit(route('payroll.run.payrollemployee.detail', { 'id': props.additional.payroll_employee.id }))
         }).catch((res) => {
             // Handle validation errors
@@ -173,6 +175,7 @@ const submit = async () => {
 }
 
 const initData = () => {
+    form.value.payroll_employee_slips_id = props.additional.payroll_employee_slips_id;
     form.value.earningComponents = Array.from(props.additional.earning_components)
     form.value.deductionComponents = Array.from(props.additional.deduction_components)
     earningComponentOptions.value = Object.fromEntries(props.additional.payroll_earning_components.map(el => [el.id, el.name]));
@@ -232,7 +235,7 @@ onMounted(() => {
                     <div>
                         {{ additional.payroll_employee.employee_detail.phone_number }}
                     </div>
-                    
+
                 </div>
                <div class="grid grid-cols-2 gap-4">
                     <div class="text-slate-600 font-bold text-md">
@@ -308,7 +311,7 @@ onMounted(() => {
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Deduction -->
                 <div>
                     <div class="bg-sky-100 text-center p-2 font-bold text-md rounded-md border border-sky-100 mb-2">Deduction</div>

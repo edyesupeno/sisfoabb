@@ -20,7 +20,9 @@ use App\Http\Resources\Payroll\Payroll\SubmitPayrollResource;
 use App\Http\Requests\Payroll\Payroll\UpdatePayrollSlipRequest;
 use App\Http\Resources\Payroll\Payroll\PayrollSlipListResource;
 use App\Http\Resources\Payroll\Payroll\PayrollEmployeeListResource;
+use App\Models\Employee;
 use App\Models\PayrollComponent;
+use App\Models\PayrollEmployeeSlip;
 use App\Services\Employee\Employee\AttendanceLogService;
 use App\Services\Employee\Employee\EmployeeService;
 use Maatwebsite\Excel\Facades\Excel;
@@ -136,7 +138,7 @@ class PayrollController extends AdminBaseController
     {
         $payrollEmployee = $this->runPayrollService->getPayrollEmployeeDetail($id);
 
-        $tunjangan_jabatan = collect($this->runPayrollService->getEarningEmployeeSlipComponents($id))->firstWhere('name', 'TUNJANGAN JABATAN')['value'] + $payrollEmployee->amount;
+        $tunjangan_bpjs = collect($this->runPayrollService->getEarningEmployeeSlipComponents($id))->firstWhere('name', 'TUNJANGAN JABATAN')['value'] + $payrollEmployee->amount;
 
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/detail', [
             "title" => 'ERP ABB | Payroll',
@@ -144,20 +146,20 @@ class PayrollController extends AdminBaseController
                 'payroll_employee' => $payrollEmployee,
                 'payroll_date' => Carbon::parse($payrollEmployee->payroll_slip->date)->format('F Y'),
                 'base_salary' => number_format($payrollEmployee->amount, 2, ',', '.'),
-                'total_earning' => number_format($payrollEmployee->earning_total + $payrollEmployee->amount + (($tunjangan_jabatan * 4.89)/100), 2, ',', '.'),
-                'total_deduction' => number_format($payrollEmployee->deduction_total + (($tunjangan_jabatan * 6.89)/100) + (($tunjangan_jabatan * 3.00)/100) + (($tunjangan_jabatan * 5.00)/100), 2, ',', '.'),
+                'total_earning' => number_format($payrollEmployee->earning_total + $payrollEmployee->amount + (($tunjangan_bpjs * 4.89) / 100), 2, ',', '.'),
+                'total_deduction' => number_format($payrollEmployee->deduction_total + (($tunjangan_bpjs * 6.89) / 100) + (($tunjangan_bpjs * 3.00) / 100) + (($tunjangan_bpjs * 5.00) / 100), 2, ',', '.'),
                 'take_home_pay' => number_format($payrollEmployee->total_amount, 2, ',', '.'),
-                'tunjangan_bpjs' => number_format($tunjangan_jabatan, 2, ',', '.'),
-                'bpjs_tk' => number_format(($tunjangan_jabatan * 4.89)/100, 2, ',', '.'),
-                'bpjs_jht' => number_format(($tunjangan_jabatan * 3.70)/100, 2, ',', '.'),
-                'bpjs_jkk' => number_format(($tunjangan_jabatan * 0.89)/100, 2, ',', '.'),
-                'bpjs_jkm' => number_format(($tunjangan_jabatan * 0.30)/100, 2, ',', '.'),
-                'bpjs_tk_perusahaan' => number_format(($tunjangan_jabatan * 4.89)/100, 2, ',', '.'),
-                'bpjs_tk_karyawan' => number_format(($tunjangan_jabatan * 2.00)/100, 2, ',', '.'),
-                'bpjs_pensiun_perusahaan' => number_format(($tunjangan_jabatan * 2.00)/100, 2, ',', '.'),
-                'bpjs_pensiun_karyawan' => number_format(($tunjangan_jabatan * 1.00)/100, 2, ',', '.'),
-                'bpjs_kesehatan_perusahaan' => number_format(($tunjangan_jabatan * 4.00)/100, 2, ',', '.'),
-                'bpjs_kesehatan_karyawan' => number_format(($tunjangan_jabatan * 1.00)/100, 2, ',', '.'),
+                'tunjangan_bpjs' => number_format($tunjangan_bpjs, 2, ',', '.'),
+                'bpjs_tk' => number_format(($tunjangan_bpjs * 4.89) / 100, 2, ',', '.'),
+                'bpjs_jht' => number_format(($tunjangan_bpjs * 3.70) / 100, 2, ',', '.'),
+                'bpjs_jkk' => number_format(($tunjangan_bpjs * 0.89) / 100, 2, ',', '.'),
+                'bpjs_jkm' => number_format(($tunjangan_bpjs * 0.30) / 100, 2, ',', '.'),
+                'bpjs_tk_perusahaan' => number_format(($tunjangan_bpjs * 4.89) / 100, 2, ',', '.'),
+                'bpjs_tk_karyawan' => number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.'),
+                'bpjs_pensiun_perusahaan' => number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.'),
+                'bpjs_pensiun_karyawan' => number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.'),
+                'bpjs_kesehatan_perusahaan' => number_format(($tunjangan_bpjs * 4.00) / 100, 2, ',', '.'),
+                'bpjs_kesehatan_karyawan' => number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.'),
                 'earning_components' => $this->runPayrollService->getEarningEmployeeSlipComponents($id),
                 'deduction_components' => $this->runPayrollService->getDeductionEmployeeSlipComponents($payrollEmployee),
                 'start_date' => $payrollEmployee->payroll_slip->date,
@@ -165,7 +167,6 @@ class PayrollController extends AdminBaseController
                 'user_id' => $payrollEmployee->employee_detail->user_id
             ]
         ]);
-
     }
 
     public function payrollEmployeeEdit($id)
@@ -176,6 +177,7 @@ class PayrollController extends AdminBaseController
         return Inertia::render($this->source . 'payroll/payroll/payrollemployee/edit', [
             "title" => 'ERP ABB | Payroll',
             "additional" => [
+                'payroll_employee_slips_id' => $id,
                 'payroll_employee' => $payrollEmployee,
                 'user_id' => $payrollEmployee->employee_detail->user_id,
                 'start_date' => $payrollEmployee->payroll_slip->date,
@@ -326,9 +328,20 @@ class PayrollController extends AdminBaseController
 
         $request->merge(['earningComponents' => $earningComponents, 'deductionComponents' => $deductionComponents]);
 
+
+
         try {
             $slip = $this->runPayrollService->updateStatusEmployeeSlip($id, $request);
             $this->runPayrollService->updateEmployeeSlip($slip, $request);
+
+            foreach ($request->deductionComponents as $deductionItem) {
+                if ($deductionItem['name'] == 'Pajak PPh21') {
+                    $PayrollEmployeeSlipUpdateTax = PayrollEmployeeSlip::where('id', $request->payroll_employee_slips_id)->first();
+                    $PayrollEmployeeSlipUpdateTax->tax_value = $deductionItem['value'];
+                    $PayrollEmployeeSlipUpdateTax->update();
+                    break;
+                }
+            }
 
             $result = new SubmitPayrollResource(true, 'Success Update Payroll');
             return $this->respond($result);

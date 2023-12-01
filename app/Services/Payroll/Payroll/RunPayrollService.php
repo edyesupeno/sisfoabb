@@ -71,7 +71,7 @@ class RunPayrollService
                 'amount' => number_format($q->value, 2, ',', '.')
             ];
         });
-        
+
         return $earningSlipComponents;
     }
 
@@ -96,18 +96,18 @@ class RunPayrollService
 
         $extDeduction = [];
 
-        if($employeeSlip->bpjsk_value){
-            $data = [
-                'id' => null,
-                'name' => 'Bpjs Kesehatan',
-                'payroll_component_id' => null,
-                'value' => (int)$employeeSlip->bpjsk_value,
-                'amount' =>  number_format($employeeSlip->bpjsk_value, 2, ',', '.')
-            ];
+        // if($employeeSlip->bpjsk_value){
+        //     $data = [
+        //         'id' => null,
+        //         'name' => 'Bpjs Kesehatan',
+        //         'payroll_component_id' => null,
+        //         'value' => (int)$employeeSlip->bpjsk_value,
+        //         'amount' =>  number_format($employeeSlip->bpjsk_value, 2, ',', '.')
+        //     ];
 
-            array_push($extDeduction, $data);
-        } 
-        
+        //     array_push($extDeduction, $data);
+        // }
+
         if($employeeSlip->jkk) {
             $data = [
                 'id' => null,
@@ -118,8 +118,8 @@ class RunPayrollService
             ];
 
             array_push($extDeduction, $data);
-        } 
-        
+        }
+
         if ($employeeSlip->jht) {
             $data = [
                 'id' => null,
@@ -130,8 +130,8 @@ class RunPayrollService
             ];
 
             array_push($extDeduction, $data);
-        } 
-        
+        }
+
         if ($employeeSlip->jkm) {
             $data = [
                 'id' => null,
@@ -142,27 +142,29 @@ class RunPayrollService
             ];
 
             array_push($extDeduction, $data);
-        } 
-        
-        if ($employeeSlip->jp) {
-            $data = [
-                'id' => null,
-                'name' => 'Bpjs Jaminan Pensiun',
-                'payroll_component_id' => null,
-                'value' => (int)$employeeSlip->jp,
-                'amount' =>  number_format($employeeSlip->jp, 2, ',', '.')
-            ];
+        }
 
-            array_push($extDeduction, $data);
-        } 
-        
+        // if ($employeeSlip->jp) {
+        //     $data = [
+        //         'id' => null,
+        //         'name' => 'Bpjs Jaminan Pensiun',
+        //         'payroll_component_id' => null,
+        //         'value' => (int)$employeeSlip->jp,
+        //         'amount' =>  number_format($employeeSlip->jp, 2, ',', '.')
+        //     ];
+
+        //     array_push($extDeduction, $data);
+        // }
+
         if ($employeeSlip->tax_value) {
             $data = [
                 'id' => null,
                 'name' => 'Pajak PPh21',
                 'payroll_component_id' => null,
                 'value' => (int)$employeeSlip->tax_value,
-                'amount' =>  number_format($employeeSlip->tax_value, 2, ',', '.')
+                'amount' =>  number_format($employeeSlip->tax_value, 2, ',', '.'),
+                'is_editable' => true,
+                ''
             ];
 
             array_push($extDeduction, $data);
@@ -325,7 +327,7 @@ class RunPayrollService
         $slip = PayrollEmployeeSlip::findOrFail($id);
         $payroll_slip_id = $slip->payroll_slip_id;
         $slip->delete();
-        
+
         // Update Slip Total Amount
         $employeeSlips = PayrollEmployeeSlip::where('payroll_slip_id', $payroll_slip_id)->get();
         $updateTotalAmount = PayrollSlip::find($payroll_slip_id);

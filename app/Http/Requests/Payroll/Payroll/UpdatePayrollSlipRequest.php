@@ -24,7 +24,7 @@ class UpdatePayrollSlipRequest extends FormRequest
     public function rules()
     {
         return [
-            'paid_on' => 'required',
+            // 'paid_on' => 'required',
             'status' => 'required',
         ];
     }
