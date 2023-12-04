@@ -14,6 +14,11 @@ class GetDetailEmployeeMenu
                 'icon' =>  'VDetailInformation',
             ],
             [
+                'text' => 'Biodata',
+                'url' => route('employment.employee.biodataShow', ['id' => $id]),
+                'icon' =>  'VDetailInformation',
+            ],
+            [
                 'text' => 'Attendance Log',
                 'url' => route('employment.employee.attendance-log.index', ['id' => $id]),
                 'icon' =>  'VAttendanceLog',

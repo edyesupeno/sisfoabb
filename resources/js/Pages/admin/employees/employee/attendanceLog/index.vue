@@ -216,6 +216,7 @@ const getIconStatus = (status) => {
 onMounted(() => {
     getAttendanceOverviewData()
     getData(1)
+    console.log(props.additional);
 });
 </script>
 
@@ -305,7 +306,7 @@ onMounted(() => {
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.clock_in }} </td>
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.clock_out }} </td>
                                 <td class="px-4 whitespace-nowrap h-16"> {{ data.work_hours }} </td>
-                                <td class="px-4 whitespace-nowrap h-16 capitalize"> 
+                                <td class="px-4 whitespace-nowrap h-16 capitalize">
                                     <VBadge :text="data.status.replace(/_/g, ' ')" :color="getTypeStatus(data.status)" :icon="getIconStatus(data.status)" size="sm" />
                                 </td>
                             </tr>

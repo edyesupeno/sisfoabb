@@ -150,6 +150,10 @@ const initData = () => {
             label: 'Direct Manager',
             value: props.additional.employee.manager ? props.additional.employee.manager.user_detail.name : '-'
         },
+        {
+            label: 'NPWP',
+            value: props.additional.employee.npwp != null ? props.additional.employee.npwp : '-'
+        },
     ]
 
     itemSelected = {
@@ -187,7 +191,8 @@ const initData = () => {
         end_contract: props.additional.employee.end_date ? dayjs(props.additional.employee.end_date) : null,
         payroll_group_id: props.additional.employee.payroll_group_id ?? '',
         image: props.additional.employee.image,
-        manager_id: props.additional.employee.manager_id
+        manager_id: props.additional.employee.manager_id,
+        npwp: props.additional.employee.npwp
     }
 }
 
@@ -244,7 +249,7 @@ onMounted(() => {
                             </div>
                         </div>
                     </section>
-                    
+
                     <!-- Finance -->
                     <section>
                         <div class="font-semibold text-slate-800 text-base mb-4">Finance</div>

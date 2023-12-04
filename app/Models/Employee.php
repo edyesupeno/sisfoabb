@@ -93,4 +93,8 @@ class Employee extends Model
     {
         return $this->belongsTo(Employee::class, 'manager_id', 'id');
     }
+
+    public function employeeContractBiodata(){
+        return $this->hasOne(EmployeeContractBiodata::class, 'employee_id', 'id');
+    }
 }

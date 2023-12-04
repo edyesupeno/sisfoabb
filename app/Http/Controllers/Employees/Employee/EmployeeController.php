@@ -24,17 +24,23 @@ use App\Http\Resources\Employees\Employee\EmployeeListResource;
 use App\Http\Requests\Employee\Employee\ValidateBasicInfoRequest;
 use App\Http\Resources\Employees\Employee\SubmitEmployeeResource;
 use App\Http\Requests\Employee\Employee\ValidateEmploymentDataRequest;
+use App\Models\EmployeeContractBiodata;
 
 class EmployeeController extends AdminBaseController
 {
     public function __construct(
-        EmployeeService $employeeService, GetDesignationOptions $getDesignationOptions,
-        GetRoleOptions $getRoleOptions, GetBpjskNppOptions $getBpjskNppOptions,
-        GetBpjstkNppOptions $getBpjstkNppOptions, GetBpjstkComponentOptions $getBpjstkComponentOptions,
-        GetBranchOptions $getBranchOptions, GetEmploymentStatusOptions $getEmploymentStatusOptions,
-        GetPtkpTaxListOptions $getPtkpTaxListOptions, GetPayrollGroupOptions $getPayrollGroupOptions,
+        EmployeeService $employeeService,
+        GetDesignationOptions $getDesignationOptions,
+        GetRoleOptions $getRoleOptions,
+        GetBpjskNppOptions $getBpjskNppOptions,
+        GetBpjstkNppOptions $getBpjstkNppOptions,
+        GetBpjstkComponentOptions $getBpjstkComponentOptions,
+        GetBranchOptions $getBranchOptions,
+        GetEmploymentStatusOptions $getEmploymentStatusOptions,
+        GetPtkpTaxListOptions $getPtkpTaxListOptions,
+        GetPayrollGroupOptions $getPayrollGroupOptions,
         GetDetailEmployeeMenu $getDetailEmployeeMenu
-    ){
+    ) {
         $this->employeeService = $employeeService;
         $this->getDesignationOptions = $getDesignationOptions;
         $this->getRoleOptions = $getRoleOptions;
@@ -55,7 +61,7 @@ class EmployeeController extends AdminBaseController
             $branchOptions[$key] = $value;
         }
 
-        // Employee List 
+        // Employee List
         $employeeLists = [];
         $chooses = Employee::with(['branch_detail', 'user_detail'])->get();
         foreach ($chooses as $choose) {
@@ -85,8 +91,8 @@ class EmployeeController extends AdminBaseController
     {
         $getFile = new GetFile();
         $employee = $this->employeeService->getDetailEmployee($id);
-        
-        // Employee List 
+
+        // Employee List
         $employeeLists = [];
         $chooses = Employee::with(['branch_detail', 'user_detail'])->get();
         foreach ($chooses as $choose) {
@@ -210,5 +216,75 @@ class EmployeeController extends AdminBaseController
             DB::rollBack();
             return $this->exceptionError($e->getMessage());
         }
+    }
+
+    public function biodataShow($id)
+    {
+        $employee = $this->employeeService->getDetailEmployee($id);
+
+        return Inertia::render($this->source . 'employees/employee/detail/biodata', [
+            "title" => 'ERP ABB | Employee',
+            "additional" => [
+                'menu' => $this->getDetailEmployeeMenu->handle($id),
+                'employee' => $employee
+            ]
+        ]);
+    }
+
+    public function biodataUpdate(Request $request, $id)
+    {
+
+        $request->validate([
+            'badge_npn' => 'required',
+            'badge_abb' => 'required',
+            'sektor' => 'required',
+            'jabatan_ccpm' => 'required',
+            'tempat_lahir' => 'required',
+            'tanggal_lahir' => 'required',
+            'usia' => 'required',
+            'nik' => 'required',
+            'agama' => 'required',
+            'komplek' => 'required',
+            'rt'  => 'required',
+            'rw'  => 'required',
+            'kelurahan'  => 'required',
+            'kecamatan'  => 'required',
+            'kabupaten'  => 'required',
+            'provinsi'  => 'required',
+            'sim'  => 'required',
+            'status_pajak'  => 'required',
+            'no_kk'  => 'required',
+            'pendidikan_formal'  => 'required',
+            'gada'  => 'required',
+            'no_sertifikat'  => 'required',
+            'penyelenggara'  => 'required',
+            'dikeluarkan_oleh'  => 'required',
+            'no_kta' => 'required',
+            'no_reg_kta' => 'required',
+            'masa_berlaku' => 'required',
+            'status_kta' => 'required',
+            'gol_darah' => 'required'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $employeeContractBiodata = EmployeeContractBiodata::where('employee_id', $id)->first();
+
+            if($employeeContractBiodata){
+                $employeeContractBiodata->update($request->all());
+            }else{
+                $request['employee_id'] = $id;
+                EmployeeContractBiodata::create($request->all());
+            }
+
+            $result = new SubmitEmployeeResource([], 'Success Update Employee');
+            DB::commit();
+            return $this->respond($result);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return $this->exceptionError($e->getMessage());
+        }
+
     }
 }

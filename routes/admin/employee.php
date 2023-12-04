@@ -27,6 +27,9 @@ Route::prefix('employment')->name('employment.')->group(function () {
         Route::post('{id}/update', 'updateEmployee')->name('update');
         Route::delete('{id}', 'deleteEmployee')->name('delete');
 
+        Route::get('biodata/{id}', 'biodataShow')->name('biodataShow');
+        Route::post('biodata/{id}/update', 'biodataUpdate')->name('biodataUpdate');
+
         Route::controller(AttendanceLogController::class)->prefix('attendance-log')->name('attendance-log.')->group(function () {
             Route::get('{id}', 'attendanceLogIndex')->name('index');
             Route::get('{id}/get-data', 'getData')->name('getdata');

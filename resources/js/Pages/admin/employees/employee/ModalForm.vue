@@ -48,6 +48,7 @@ const openForm = () => {
     } else {
         form.value = ref({})
     }
+
 }
 
 const closeForm = () => {
@@ -455,7 +456,7 @@ const update = async () => {
                         :errorMessage="formError.email" @update:modelValue="formError.email = ''" />
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Phone Number <span class="text-rose-500">*</span> </label>
-                        <vue-tel-input v-model="phone" mode="international" 
+                        <vue-tel-input v-model="phone" mode="international"
                             @on-input="validatePhone"
                             :dropdownOptions="{ showFlags: true, showDialCodeInList: true }"
                             :inputOptions="{ showDialCode: true}"
@@ -469,7 +470,7 @@ const update = async () => {
                             {{ formError.phone_number }}
                         </div>
                     </div>
-                    
+
                     <VInput placeholder="Insert Employee External Id" label="Employee External Id" v-model="form.employee_external_id"
                         :errorMessage="formError.employee_external_id" @update:modelValue="formError.employee_external_id = ''"
                         :tooltip="true" tooltipBg="white" :disabled="additional.employee_settings.editable_employee_external_id != 1 && updateAction">
@@ -614,6 +615,11 @@ const update = async () => {
                     <div class="col-span-2">
                         <VSelect placeholder="Select Branch" :required="true" v-model="form.branch_id" :options="additional.branch_list" label="Branch"
                             :errorMessage="formError.branch_id" @update:modelValue="formError.branch_id = ''" />
+                    </div>
+                    <div class="col-span-2">
+                        <VInput placeholder="Insert NPWP" label="Employee NPWP" :required="true"
+                        v-model="form.npwp" :errorMessage="formError.npwp"
+                        @update:modelValue="formError.npwp = ''" />
                     </div>
                     <VSelect placeholder="Select Employment List" :required="true" v-model="form.employment_status_id"
                         :options="additional.employment_list" label="Employment Status" :errorMessage="formError.employment_status_id"

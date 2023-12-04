@@ -45,9 +45,9 @@ class EmployeeService
                 });
             });
         });
-        
+
         // Sort Relation
-        if($sort_by_name){      
+        if($sort_by_name){
             if($sort_by_name === 'asc'){
                 $result = $query->get()->sortBy('user_detail.name');
             }else{
@@ -68,13 +68,13 @@ class EmployeeService
             ->transform(function ($setting) {
                 return $setting->value;
             })->toArray();
-            
+
         return $settings;
     }
 
     public function getDetailEmployee($id)
     {
-        $employee = Employee::with(['branch_detail', 'user_detail', 'designation_detail', 'employment_status_detail', 'ptkp_status_detail', 'payroll_group_detail', 'manager.user_detail'])->findOrFail($id);
+        $employee = Employee::with(['branch_detail', 'user_detail', 'designation_detail', 'employment_status_detail', 'ptkp_status_detail', 'payroll_group_detail', 'manager.user_detail', 'employeeContractBiodata'])->findOrFail($id);
         return $employee;
     }
 
@@ -84,7 +84,7 @@ class EmployeeService
         $userInput = $request->only(['email']);
         $userInput['user_device'] = !$request->user_device || $request->user_device === 'null'  ? null : $request->user_device;
         $userInput['name'] = $request->employee_name;
-        $userInput['password'] = Hash::make($request->password);   
+        $userInput['password'] = Hash::make($request->password);
         $user = User::create($userInput);
         $role = Role::findOrFail($request->role_id);
         $user->assignRole($role->name);
@@ -110,7 +110,7 @@ class EmployeeService
         $employeeInput['end_date'] = !$request->end_date || $request->end_date === 'null' ? null : $request->end_date;
         $employeeInput['payroll_group_id'] = !$request->payroll_group_id || $request->payroll_group_id === 'null' ? null : $request->payroll_group_id;
         $employeeInput['manager_id'] = !$request->manager_id || $request->manager_id === 'null' ? null : $request->manager_id;
-        
+
         // Calculate Employee External Id
         $generateExternalId = new CalculateEmployeeExternalId();
         $employeeOrderId = $generateExternalId->calculateIncrementalEmployeeId();
@@ -133,7 +133,11 @@ class EmployeeService
         $userInput = $request->only(['email']);
         $userInput['user_device'] = !$request->user_device || $request->user_device === 'null'  ? null : $request->user_device;
         $userInput['name'] = $request->employee_name;
-        $userInput['password'] = Hash::make($request->password);
+
+        if($request->password){
+            $userInput['password'] = Hash::make($request->password);
+        }
+
         $user = User::findOrFail($request->user_id);
         $role = Role::findOrFail($request->role_id);
         $user->update($userInput);
@@ -148,7 +152,7 @@ class EmployeeService
         }
 
         // Create Employee
-        $employeeInput = $request->only(['branch_id', 'designation_id', 'phone_number', 'start_date', 'address', 'account_number', 'bank_name', 'account_name', 'employment_status_id', 'bpjsk_number_card', 'bpjsk_setting_id', 'bpjstk_number_card', 'bpjstk_setting_id']);
+        $employeeInput = $request->only(['branch_id', 'designation_id', 'phone_number', 'start_date', 'address', 'account_number', 'bank_name', 'account_name', 'employment_status_id', 'bpjsk_number_card', 'bpjsk_setting_id', 'bpjstk_number_card', 'bpjstk_setting_id', 'npwp']);
         $employeeInput['image'] = $file;
 
         $employeeInput['is_use_bpjsk'] =  filter_var($request->is_use_bpjsk, FILTER_VALIDATE_BOOLEAN);
@@ -193,4 +197,5 @@ class EmployeeService
 
         return $employee;
     }
+
 }
