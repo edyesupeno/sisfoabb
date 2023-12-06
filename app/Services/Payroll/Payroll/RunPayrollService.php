@@ -90,21 +90,21 @@ class RunPayrollService
                 'id' => null,
                 'name' => '1. JHT (3,70%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 3.70) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 3.70) / 100, 2, ',', '.')
             ]);
             array_push($extEarning, [
                 'id' => null,
                 'name' => '2. JKK (0,89%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 0.89) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 0.89) / 100, 2, ',', '.')
             ]);
             array_push($extEarning, [
                 'id' => null,
                 'name' => '3. JKM (0,30%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 0.30) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 0.30) / 100, 2, ',', '.')
             ]);
         }
@@ -114,7 +114,7 @@ class RunPayrollService
                 'id' => null,
                 'name' => 'BPJS TK Pensiun (2%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 2.0) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 2.0) / 100, 2, ',', '.')
             ]);
         }
@@ -124,7 +124,7 @@ class RunPayrollService
                 'id' => null,
                 'name' => 'BPJS Kesehatan (4%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 4.0) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 4.0) / 100, 2, ',', '.')
             ]);
         }
@@ -169,14 +169,14 @@ class RunPayrollService
                 'id' => null,
                 'name' => '1. Perusahaan (4,89%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 4.89) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 4.89) / 100, 2, ',', '.')
             ]);
             array_push($extDeduction, [
                 'id' => null,
                 'name' => '2. Karyawan (2%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 2.00) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.')
             ]);
         }
@@ -194,14 +194,14 @@ class RunPayrollService
                 'id' => null,
                 'name' => '1. Perusahaan (2%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 2.00) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.')
             ]);
             array_push($extDeduction, [
                 'id' => null,
                 'name' => '2. Karyawan (1%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 1.00) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.')
             ]);
         }
@@ -219,14 +219,14 @@ class RunPayrollService
                 'id' => null,
                 'name' => '1. Perusahaan (4%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 4.00) / 100, 2,
                 'amount' =>  number_format(($tunjangan_bpjs * 4.00) / 100, 2, ',', '.')
             ]);
             array_push($extDeduction, [
                 'id' => null,
                 'name' => '2. Karyawan (1%)',
                 'payroll_component_id' => null,
-                'value' => '',
+                'value' => ($tunjangan_bpjs * 1.00) / 100,
                 'amount' =>  number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.')
             ]);
         }

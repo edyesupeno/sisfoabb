@@ -33,7 +33,7 @@ class GetEmployeeSlipComponent
         $earning_results = collect($component_earnings)->map(function ($q) {
             return [
                 'name' => $q['name'],
-                'amount' => number_format($q['value'], 2, '.', '')
+                'amount' => ($q['value'] != '' ? number_format($q['value'], 2, '.', '') : '')
             ];
         })->toArray();
 
@@ -46,7 +46,7 @@ class GetEmployeeSlipComponent
         $deduction_results = collect($component_deductions)->map(function ($q) {
             return [
                 'name' => $q['name'],
-                'amount' => number_format($q['value'], 2, '.', '')
+                'amount' => ($q['value'] != '' ? number_format($q['value'], 2, '.', '') : '')
             ];
         })->toArray();
 
