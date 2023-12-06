@@ -434,7 +434,7 @@ onMounted(() => {
                                 Rp{{ additional.base_salary }}
                             </div>
                         </div>
-                        <div v-if="additional.payroll_employee.employee_detail.is_use_bpjstk == '1'">
+                        <!-- <div v-if="additional.payroll_employee.employee_detail.is_use_bpjstk == '1'">
                             <div class="flex justify-between">
                                 <div>
                                     BPJS TK (4,89%)
@@ -483,7 +483,7 @@ onMounted(() => {
                             <div>
                                 Rp{{ additional.bpjs_kesehatan_perusahaan }}
                             </div>
-                        </div>
+                        </div> -->
                         <div class="flex justify-between" v-for="(data, index) in additional.earning_components" :key="index">
                             <div>
                                 {{ data.name }}
@@ -495,7 +495,7 @@ onMounted(() => {
                                 </span>
                             </div>
                             <div>
-                                Rp{{ data.amount }}
+                                {{ (data.amount != '' ? 'Rp ' : '') + data.amount  }}
                             </div>
                         </div>
                         <div class="flex justify-between">
@@ -513,7 +513,7 @@ onMounted(() => {
                 <div>
                     <div class="bg-sky-100 text-center p-2 font-bold text-md rounded-md border border-sky-100 mb-2">Deduction</div>
                     <div class="px-2 space-y-2">
-                        <div v-if="additional.payroll_employee.employee_detail.is_use_bpjstk == '1'">
+                        <!-- <div v-if="additional.payroll_employee.employee_detail.is_use_bpjstk == '1'">
                             <div class="flex justify-between">
                                 <div>
                                     BPJS TK (6,89%)
@@ -587,7 +587,7 @@ onMounted(() => {
                                     Rp{{ additional.bpjs_kesehatan_karyawan }}
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="flex justify-between" v-for="(data, index) in additional.deduction_components" :key="index">
                             <div>
                                 {{ data.name }}
@@ -599,7 +599,7 @@ onMounted(() => {
                                 </span>
                             </div>
                             <div>
-                                Rp{{ data.amount }}
+                                {{ (data.amount != '' ? 'Rp ' : '') + data.amount  }}
                             </div>
                         </div>
                         <div class="flex justify-between">

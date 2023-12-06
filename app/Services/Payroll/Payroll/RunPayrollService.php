@@ -55,6 +55,8 @@ class RunPayrollService
 
     public function getEarningEmployeeSlipComponents($id)
     {
+        $payrollEmployee = $this->getPayrollEmployeeDetail($id);
+
         $earningSlipComponents = PayrollSlipComponent::where('payroll_employee_slip_id', $id)->whereHas('payroll_component_detail', function ($q) {
             $q->where('type', 'earning');
         })->get()->map(function ($q) {
@@ -72,11 +74,68 @@ class RunPayrollService
             ];
         });
 
-        return $earningSlipComponents;
+        $extEarning = [];
+
+        $tunjangan_bpjs = collect($earningSlipComponents)->firstWhere('name', 'TUNJANGAN JABATAN')['value'] + $payrollEmployee->amount;
+        if ($payrollEmployee->employee_detail->is_use_bpjstk) {
+            array_push($extEarning, [
+                'id' => null,
+                'name' => 'BPJS TK (4,89%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  ''
+            ]);
+
+            array_push($extEarning, [
+                'id' => null,
+                'name' => '1. JHT (3,70%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 3.70) / 100, 2, ',', '.')
+            ]);
+            array_push($extEarning, [
+                'id' => null,
+                'name' => '2. JKK (0,89%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 0.89) / 100, 2, ',', '.')
+            ]);
+            array_push($extEarning, [
+                'id' => null,
+                'name' => '3. JKM (0,30%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 0.30) / 100, 2, ',', '.')
+            ]);
+        }
+
+        if($payrollEmployee->employee_detail->is_use_bpjstk && $payrollEmployee->employee_detail->bpjstk_pension_time){
+            array_push($extEarning, [
+                'id' => null,
+                'name' => 'BPJS TK Pensiun (2%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 2.0) / 100, 2, ',', '.')
+            ]);
+        }
+
+        if($payrollEmployee->employee_detail->is_use_bpjsk){
+            array_push($extEarning, [
+                'id' => null,
+                'name' => 'BPJS Kesehatan (4%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 4.0) / 100, 2, ',', '.')
+            ]);
+        }
+
+        return array_merge($extEarning, $earningSlipComponents->toArray());
+        // return $earningSlipComponents;
     }
 
     public function getDeductionEmployeeSlipComponents($employeeSlip)
     {
+
         $deductionComponents = PayrollSlipComponent::where('payroll_employee_slip_id', $employeeSlip->id)->whereHas('payroll_component_detail', function ($q) {
             $q->where('type', 'deduction');
         })->get()->map(function ($q) {
@@ -96,6 +155,82 @@ class RunPayrollService
 
         $extDeduction = [];
 
+        $tunjangan_bpjs = collect($this->getEarningEmployeeSlipComponents($employeeSlip->id))->firstWhere('name', 'TUNJANGAN JABATAN')['value'] + $employeeSlip->amount;
+        if ($employeeSlip->employee_detail->is_use_bpjstk) {
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => 'BPJS TK (6,89%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  ''
+            ]);
+
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '1. Perusahaan (4,89%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 4.89) / 100, 2, ',', '.')
+            ]);
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '2. Karyawan (2%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.')
+            ]);
+        }
+
+        if($employeeSlip->employee_detail->is_use_bpjstk && $employeeSlip->employee_detail->bpjstk_pension_time){
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => 'BPJS TK Pensiun (3%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  ''
+            ]);
+            
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '1. Perusahaan (2%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 2.00) / 100, 2, ',', '.')
+            ]);
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '2. Karyawan (1%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.')
+            ]);
+        }
+
+        if($employeeSlip->employee_detail->is_use_bpjsk){
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => 'BPJS Kesehatan (5%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  ''
+            ]);
+
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '1. Perusahaan (4%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 4.00) / 100, 2, ',', '.')
+            ]);
+            array_push($extDeduction, [
+                'id' => null,
+                'name' => '2. Karyawan (1%)',
+                'payroll_component_id' => null,
+                'value' => '',
+                'amount' =>  number_format(($tunjangan_bpjs * 1.00) / 100, 2, ',', '.')
+            ]);
+        }
+
         // if($employeeSlip->bpjsk_value){
         //     $data = [
         //         'id' => null,
@@ -108,7 +243,7 @@ class RunPayrollService
         //     array_push($extDeduction, $data);
         // }
 
-        if($employeeSlip->jkk) {
+        if ($employeeSlip->jkk) {
             $data = [
                 'id' => null,
                 'name' => 'Bpjs Jaminan Kecelakaan Kerja',
@@ -276,7 +411,7 @@ class RunPayrollService
         $earning_value_check = collect($earning_components)->whereNull('value')->count();
         $deduction_value_check = collect($deduction_components)->whereNull('value')->count();
 
-        if($earning_value_check > 0 || $deduction_value_check > 0) {
+        if ($earning_value_check > 0 || $deduction_value_check > 0) {
             throw new \Exception('Please fill all value component before save', 400);
         }
 
@@ -299,7 +434,11 @@ class RunPayrollService
 
         // Calculate Earning, Deduction and Final Amount Each Employee
         Calculate::countUpdatedComponentPayroll(
-            $slip, $final_earning, $final_deduction, $final_taxable_earning, $final_taxable_deduction
+            $slip,
+            $final_earning,
+            $final_deduction,
+            $final_taxable_earning,
+            $final_taxable_deduction
         );
 
         // Update Slip Total Amount
@@ -337,5 +476,4 @@ class RunPayrollService
 
         return true;
     }
-
 }
