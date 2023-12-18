@@ -288,18 +288,22 @@ onMounted(() => {
                     <div class="px-2 space-y-2">
                         <div class="flex justify-between items-center" v-for="(data, index) in form.earningComponents" :key="index">
                             <div class="w-5/12">
-                                <VSelect v-model="form.earningComponents[index].payroll_component_id" :options="earningComponentOptions" placeholder="Select Component" :clearable="false" @update:model-value="updateEarning(index, form.earningComponents[index].payroll_component_id)"/>
+                                    <VSelect v-model="form.earningComponents[index].payroll_component_id" :options="earningComponentOptions" placeholder="Select Component" :clearable="false" @update:model-value="updateEarning(index, form.earningComponents[index].payroll_component_id)" v-if="data.payroll_component_id"/>
+                                <div v-else>
+                                    {{ data.name }}
+                                </div>
                             </div>
                             <div class="flex space-x-2 items-center">
                                 <div v-if="data.is_editable">
                                     <VInput v-model="form.earningComponents[index].value" placeholder="Insert Value" />
                                 </div>
                                 <div v-else class="">
-                                    Rp{{ data.amount }}
+                                    {{ (data.amount != '' ? 'Rp ' : '') + data.amount  }}
+                                    <!-- Rp{{ data.amount }} -->
                                 </div>
                                 <div class="cursor-pointer" @click="deleteEarning(index)" :class="
                                     {'mt-[1px]': !data.is_editable, 'mt-[2px]': data.is_editable}
-                                ">
+                                " v-if="data.payroll_component_id">
                                     <font-awesome-icon icon="fa-solid fa-trash-can" class="h-6 text-rose-600" />
                                 </div>
                             </div>
@@ -328,7 +332,8 @@ onMounted(() => {
                                     <VInput v-model="form.deductionComponents[index].value" placeholder="Insert Value" />
                                 </div>
                                 <div v-else class="">
-                                    Rp{{ data.amount }}
+                                    {{ (data.amount != '' ? 'Rp ' : '') + data.amount  }}
+                                    <!-- Rp{{ data.amount }} -->
                                 </div>
                                 <div class="cursor-pointer" @click="deleteDeduction(index)" :class="
                                     {'mt-[1px]': !data.is_editable, 'mt-[2px]': data.is_editable}
