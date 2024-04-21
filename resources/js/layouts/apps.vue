@@ -29,7 +29,7 @@ const props = defineProps({
     modules: array()
 })
 
-console.log(props)
+console.log('MODULE:', props)
 </script>
 
 <template>

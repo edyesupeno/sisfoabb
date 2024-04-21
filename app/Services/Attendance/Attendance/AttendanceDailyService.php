@@ -332,7 +332,7 @@ class AttendanceDailyService
         // return $new_attendance_list;
 
         $filter_date = $request->filter_date ?: Carbon::now();
-        $filter_branch = $request->filter_branch ?: 1;
+        $filter_branch = $request->branch_id ?: 1;
 
         // Generate date
         $month = Carbon::parse($filter_date)->format('m');

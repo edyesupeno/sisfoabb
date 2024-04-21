@@ -164,7 +164,7 @@ class GetDashboardSidebarMenu
                 'text' => 'Project',
                 'url'  => route('project.index'),
                 'icon' => 'VProject',
-                'can'  => 'view_general_dashboard'
+                'can'  => 'view_project_project'
             ],
         ];
     }

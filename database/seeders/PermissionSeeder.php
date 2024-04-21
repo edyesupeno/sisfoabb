@@ -411,9 +411,25 @@ class PermissionSeeder extends Seeder
                     ]
                 ]
             ],
+
+            // Projects
+            [
+                'group' => 'project',
+                'sub_group' => [
+                    [
+                        'name' => 'project',
+                        'permission' => [
+                            [
+                                'name' => 'view_project_project',
+                                'label' => 'View And Action Project',
+                            ]
+                        ]
+                    ]
+                ]
+            ],
         ];
 
-        // Create permissions 
+        // Create permissions
         try {
             $newPermission = [];
             foreach ($permissions as $group) {
