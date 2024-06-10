@@ -38,7 +38,7 @@ class AttendanceService
 
         $this->settings = $settings;
     }
-    
+
     public function getAttendanceLogData($request)
     {
         $today = Carbon::now();
@@ -46,7 +46,7 @@ class AttendanceService
         $year = $request->year ?: $today->format('Y');
         $filter_status = $request->status;
 
-        // Generate date 
+        // Generate date
         $start_of_date = Carbon::createFromDate($year, $month, 1);
         $days_in_month = $start_of_date->daysInMonth;
         $end_of_date = $month === $today->format('m') ? $today : Carbon::createFromDate($year, $month, $days_in_month);
@@ -170,7 +170,7 @@ class AttendanceService
 
         if($status['message_type']) {
             $query = AttendanceOffline::query();
-            
+
             return $query->where('date_clock', $date)->where('user_id', $employee->user_id)->where('status', '!=', 'cancelled')->orderBy($sort_by, $order_by)->paginate($per_page);
         }else {
             $query = Attendance::query();
@@ -242,9 +242,17 @@ class AttendanceService
             $timeConverted < $scheduleCheck ? $is_late = true : $is_late = false;
         } else {
             if (isset($schedule) && !isset($todayAttendance)) {
-                $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('Y-m-d H:i:s');
-                $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
-                $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
+                if($schedule->is_leave == '1'){
+                    // PULANG SAAT LIBUR
+                    $scheduleYesterday = Schedule::where('user_id', $user_id)->where('date', $input_date->subDay()->format('Y-m-d'))->first();
+                    $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $scheduleYesterday->date . ' ' . $scheduleYesterday->shift_detail->start_time)->format('Y-m-d H:i:s');
+                    $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
+                    $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
+                }else{
+                    $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('Y-m-d H:i:s');
+                    $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
+                    $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
+                }
             } elseif (isset($schedule) && isset($todayAttendance) ? $todayAttendance->clock_out == null : false) {
                 $scheduleStartCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('A');
                 $scheduleEndCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->end_time)->format('A');
@@ -312,10 +320,10 @@ class AttendanceService
         $check_attendance_status = new CheckAttendanceClockedToday();
         $status = $check_attendance_status->handle($request);
         if(!$status['accepted']) {
-            throw new \Exception($status['messageValidation'], $status['status']); 
+            throw new \Exception($status['messageValidation'], $status['status']);
         }
 
-        // List All Type Attendance 
+        // List All Type Attendance
         $yesterday_clockout_without_schedule = !isset($yesterday_schedule) && (isset($yesterday_attendance_offline) ? $yesterday_attendance_offline->clock_out === null : false);
         $today_clockin_without_schedule = !isset($schedule) && !isset($today_attendance_offline);
         $today_clockout_without_schedule = !isset($schedule) && (isset($today_attendance_offline) ? $today_attendance_offline->clock_out === null : false);
@@ -388,7 +396,7 @@ class AttendanceService
         $submit_attendance = new SubmitAttendance();
         $user_id = $employee->user_id;
         $branch = $employee->branch_detail;
-        
+
         foreach ($request->all() as $value) {
             // Required Init Data
             $input = collect($value)->only(['clock', 'type', 'notes', 'latitude', 'longitude', 'image_id', 'date', 'status', 'files']);
@@ -414,7 +422,7 @@ class AttendanceService
                 $yesterday_clock_out_tolerance = Carbon::parse($yesterday_shift_time_end)->addMinutes($this->settings['tolerance_clock_out'])->format('H:i');
             }
 
-            // List All Type Attendance 
+            // List All Type Attendance
             $yesterday_clockout_without_schedule = !isset($yesterday_schedule) && (isset($yesterday_attendance_offline) ? $yesterday_attendance_offline->clock_out === null : false) && ($input['type'] === 'clockout' || $input['type'] === 'out');
             $today_clockin_without_schedule = !isset($schedule) && !isset($today_attendance_offline) && ($input['type'] === 'clockin' || $input['type'] === 'in');
             $today_clockout_without_schedule = !isset($schedule) && (isset($today_attendance_offline) ? $today_attendance_offline->clock_out === null : false) && ($input['type'] === 'clockout' || $input['type'] === 'out');
