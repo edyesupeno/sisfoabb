@@ -242,17 +242,9 @@ class AttendanceService
             $timeConverted < $scheduleCheck ? $is_late = true : $is_late = false;
         } else {
             if (isset($schedule) && !isset($todayAttendance)) {
-                if($schedule->is_leave == '1'){
-                    // PULANG SAAT LIBUR
-                    $scheduleYesterday = Schedule::where('user_id', $user_id)->where('date', $input_date->subDay()->format('Y-m-d'))->first();
-                    $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $scheduleYesterday->date . ' ' . $scheduleYesterday->shift_detail->start_time)->format('Y-m-d H:i:s');
-                    $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
-                    $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
-                }else{
-                    $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('Y-m-d H:i:s');
-                    $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
-                    $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
-                }
+                $scheduleCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('Y-m-d H:i:s');
+                $timeConverted =  Carbon::parse($input_date)->format('Y-m-d H:i:s');
+                $timeConverted > $scheduleCheck ? $is_late = true : $is_late = false;
             } elseif (isset($schedule) && isset($todayAttendance) ? $todayAttendance->clock_out == null : false) {
                 $scheduleStartCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->start_time)->format('A');
                 $scheduleEndCheck =  Carbon::createFromFormat('Y-m-d H:i', $schedule->date . ' ' . $schedule->shift_detail->end_time)->format('A');
